@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Pracownicy - SZBI{% endblock %}
+
+{% block content %}
+<h1>Pracownicy</h1>
+
+<p>
+    <a href="{% url 'core:employee_create' %}">Dodaj pracownika</a> |
+    <a href="{% url 'core:dashboard' %}">Powrót do panelu</a>
+</p>
+
+{% if messages %}
+    {% for message in messages %}
+    <p><strong>{{ message }}</strong></p>
+    {% endfor %}
+{% endif %}
+
+{% if employees %}
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Imię i nazwisko</th>
+            <th>Login</th>
+            <th>Dział</th>
+            <th>Stanowiska</th>
+            <th>Status</th>
+            <th>Admin</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for employee in employees %}
+        <tr>
+            <td>{{ employee.get_full_name }}</td>
+            <td>{{ employee.user.username }}</td>
+            <td>{{ employee.department.name|default:"-" }}</td>
+            <td>{{ employee.get_positions_display|default:"-" }}</td>
+            <td>{{ employee.position.name|default:"-" }}</td>
+            <td>{% if employee.is_active %}Aktywny{% else %}Nieaktywny{% endif %}</td>
+            <td>{% if employee.user.is_staff %}Tak{% else %}Nie{% endif %}</td>
+            <td>
+                <a href="{% url 'core:employee_permissions' employee.pk %}">Uprawnienia</a> |
+                <a href="{% url 'core:employee_update' employee.pk %}">Edytuj</a> |
+                <a href="{% url 'core:employee_delete' employee.pk %}">Usuń</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p>Łącznie: <strong>{{ employees|length }}</strong> pracowników</p>
+{% else %}
+<p>Brak pracowników. <a href="{% url 'core:employee_create' %}">Dodaj pierwszego pracownika</a>.</p>
+{% endif %}
+{% endblock %}

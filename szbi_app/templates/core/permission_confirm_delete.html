@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Usuń uprawnienie - SZBI{% endblock %}
+
+{% block content %}
+<h2>Usuń uprawnienie</h2>
+
+<p>Czy na pewno chcesz usunąć uprawnienie <strong>{{ permission.name }}</strong>?</p>
+
+{% if permission.groups.exists %}
+<div style="border: 1px solid red; padding: 10px; margin: 10px 0;">
+    <strong>Uwaga!</strong> To uprawnienie jest używane w {{ permission.groups.count }} grupach uprawnień.
+    Zostanie usunięte z tych grup.
+</div>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Tak, usuń</button>
+    <a href="{% url 'core:permission_list' %}">Anuluj</a>
+</form>
+
+<hr>
+<p><a href="{% url 'core:permission_list' %}">← Powrót do listy uprawnień</a></p>
+{% endblock %}

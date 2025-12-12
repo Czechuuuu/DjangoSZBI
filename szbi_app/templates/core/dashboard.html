@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Panel główny - SZBI{% endblock %}
+
+{% block content %}
+<h2>Panel główny</h2>
+
+<p>Witaj, <strong>{{ user.username }}</strong>!</p>
+
+{% if is_admin %}
+<h3>Administracja systemem</h3>
+<p>Wybierz obszar, którym chcesz zarządzać:</p>
+
+<table border="1" cellpadding="20" cellspacing="0">
+    <tr>
+        <td>
+            <h4>Organizacja</h4>
+            <p>Zarządzaj strukturą organizacyjną, działami i stanowiskami.</p>
+            <a href="{% url 'core:organization_structure' %}">Przejdź →</a>
+        </td>
+        <td>
+            <h4>Pracownicy</h4>
+            <p>Zarządzaj pracownikami i ich przypisaniem do działów.</p>
+            <a href="{% url 'core:employee_list' %}">Przejdź →</a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h4>Uprawnienia</h4>
+            <p>Zarządzaj grupami uprawnień i przypisuj je do stanowisk.</p>
+            <a href="{% url 'core:permission_list' %}">Przejdź →</a>
+        </td>
+        <td>
+            <h4>Dziennik zdarzeń</h4>
+            <p>Przeglądaj historię zdarzeń i aktywności w systemie.</p>
+            <a href="#">Przejdź →</a>
+            <br><small>(w przygotowaniu)</small>
+        </td>
+    </tr>
+</table>
+{% else %}
+<p>Nie masz uprawnień administratora. Skontaktuj się z administratorem systemu.</p>
+{% endif %}
+
+<hr>
+
+<h3>Szybki dostęp</h3>
+<ul>
+    <li><a href="/documents/">Dokumenty</a></li>
+</ul>
+{% endblock %}

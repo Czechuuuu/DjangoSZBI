@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - SZBI{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<p><a href="{% url 'core:employee_list' %}">← Powrót do listy</a></p>
+
+{% if messages %}
+    {% for message in messages %}
+    <p><strong>{{ message }}</strong></p>
+    {% endfor %}
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    
+    <h3>Dane konta</h3>
+    
+    <p>
+        <label for="id_username">{{ form.username.label }} *</label><br>
+        <input type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}" required>
+        {% if form.username.help_text %}<br><small>{{ form.username.help_text }}</small>{% endif %}
+        {% if form.username.errors %}<br><span style="color:red;">{{ form.username.errors.0 }}</span>{% endif %}
+    </p>
+    
+    <p>
+        <label for="id_password">{{ form.password.label }}{% if not employee %} *{% endif %}</label><br>
+        <input type="password" name="password" id="id_password" {% if not employee %}required{% endif %}>
+        {% if form.password.help_text %}<br><small>{{ form.password.help_text }}</small>{% endif %}
+        {% if form.password.errors %}<br><span style="color:red;">{{ form.password.errors.0 }}</span>{% endif %}
+    </p>
+    
+    <p>
+        <label for="id_password_confirm">{{ form.password_confirm.label }}{% if not employee %} *{% endif %}</label><br>
+        <input type="password" name="password_confirm" id="id_password_confirm" {% if not employee %}required{% endif %}>
+        {% if form.password_confirm.errors %}<br><span style="color:red;">{{ form.password_confirm.errors.0 }}</span>{% endif %}
+    </p>
+    
+    <p>
+        <input type="checkbox" name="is_admin" id="id_is_admin" {% if form.is_admin.value %}checked{% endif %}>
+        <label for="id_is_admin">{{ form.is_admin.label }}</label>
+        {% if form.is_admin.help_text %}<br><small>{{ form.is_admin.help_text }}</small>{% endif %}
+    </p>
+
+    <h3>Dane osobowe</h3>
+    
+    <p>
+        <label for="id_first_name">{{ form.first_name.label }} *</label><br>
+        <input type="text" name="first_name" id="id_first_name" value="{{ form.first_name.value|default:'' }}" required>
+        {% if form.first_name.errors %}<br><span style="color:red;">{{ form.first_name.errors.0 }}</span>{% endif %}
+    </p>
+    
+    <p>
+        <label for="id_last_name">{{ form.last_name.label }} *</label><br>
+        <input type="text" name="last_name" id="id_last_name" value="{{ form.last_name.value|default:'' }}" required>
+        {% if form.last_name.errors %}<br><span style="color:red;">{{ form.last_name.errors.0 }}</span>{% endif %}
+    </p>
+
+    <h3>Przypisanie w organizacji</h3>
+    
+    <p>
+        <label for="id_department">{{ form.department.label }}</label><br>
+        <select name="department" id="id_department">
+            <option value="">-- Brak --</option>
+            {% for dept in form.department.field.queryset %}
+            <option value="{{ dept.pk }}" {% if form.department.value == dept.pk|stringformat:"s" or form.department.value == dept.pk %}selected{% endif %}>
+                {{ dept.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </p>
+    
+    <fieldset>
+        <legend>{{ form.positions.label }}</legend>
+        {% for pos in form.positions.field.queryset %}
+        <label>
+            <input type="checkbox" name="positions" value="{{ pos.pk }}" 
+                   {% if pos.pk in form.positions.value or pos.pk|stringformat:"s" in form.positions.value %}checked{% endif %}>
+            {{ pos.name }}
+        </label><br>
+        {% empty %}
+        <em>Brak stanowisk w organizacji</em>
+        {% endfor %}
+    </fieldset>
+    
+    <p>
+        <label for="id_hire_date">{{ form.hire_date.label }}</label><br>
+        <input type="date" name="hire_date" id="id_hire_date" value="{{ form.hire_date.value|default:'' }}">
+    </p>
+    
+    <p>
+        <input type="checkbox" name="is_active" id="id_is_active" {% if form.is_active.value %}checked{% endif %}>
+        <label for="id_is_active">{{ form.is_active.label }}</label>
+    </p>
+    
+    <h3>Grupy uprawnień</h3>
+    
+    <fieldset>
+        <legend>{{ form.permission_groups.label }}</legend>
+        {% if form.permission_groups.help_text %}<small>{{ form.permission_groups.help_text }}</small><br><br>{% endif %}
+        {% for group in form.permission_groups.field.queryset %}
+        <label>
+            <input type="checkbox" name="permission_groups" value="{{ group.pk }}" 
+                   {% if group.pk in form.permission_groups.value or group.pk|stringformat:"s" in form.permission_groups.value %}checked{% endif %}>
+            {{ group.name }}
+        </label><br>
+        {% empty %}
+        <em>Brak zdefiniowanych grup uprawnień</em>
+        {% endfor %}
+    </fieldset>
+
+    <hr>
+    
+    <p>
+        <button type="submit">Zapisz</button>
+        <a href="{% url 'core:employee_list' %}">Anuluj</a>
+    </p>
+</form>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Usuń pracownika - SZBI{% endblock %}
+
+{% block content %}
+<h1>Usunięcie pracownika</h1>
+
+<p>Czy na pewno chcesz usunąć pracownika:</p>
+
+<p><strong>{{ employee.get_full_name }}</strong></p>
+
+<ul>
+    <li>Login: {{ employee.user.username }}</li>
+    {% if employee.department %}<li>Dział: {{ employee.department.name }}</li>{% endif %}
+    {% if employee.position %}<li>Stanowisko: {{ employee.position.name }}</li>{% endif %}
+</ul>
+
+<p><strong>Uwaga:</strong> Ta operacja usunie również konto użytkownika w systemie!</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Tak, usuń</button>
+    <a href="{% url 'core:employee_list' %}">Anuluj</a>
+</form>
+{% endblock %}

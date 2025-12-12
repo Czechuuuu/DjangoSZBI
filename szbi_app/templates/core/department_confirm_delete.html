@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Usuń dział - SZBI{% endblock %}
+
+{% block content %}
+<h2>Usuń dział</h2>
+
+<p>Czy na pewno chcesz usunąć dział <strong>{{ department.name }}</strong>?</p>
+
+{% if department.subdepartments.exists or department.positions.exists %}
+<div style="border: 1px solid red; padding: 10px; margin: 10px 0;">
+    <strong>Uwaga!</strong> Ten dział zawiera:
+    <ul>
+        {% if department.subdepartments.exists %}
+        <li>{{ department.subdepartments.count }} poddziałów</li>
+        {% endif %}
+        {% if department.positions.exists %}
+        <li>{{ department.positions.count }} stanowisk</li>
+        {% endif %}
+    </ul>
+    <p>Wszystkie te elementy zostaną również usunięte!</p>
+</div>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Tak, usuń</button>
+    <a href="{% url 'core:organization_structure' %}">Anuluj</a>
+</form>
+
+<hr>
+<p><a href="{% url 'core:organization_structure' %}">← Powrót do struktury organizacji</a></p>
+{% endblock %}

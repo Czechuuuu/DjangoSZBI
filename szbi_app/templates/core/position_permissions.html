@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Uprawnienia stanowiska - SZBI{% endblock %}
+
+{% block content %}
+<h2>Uprawnienia stanowiska: {{ position.name }}</h2>
+<p>Dział: {{ position.department.name|default:"brak" }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <h3>Przypisane grupy uprawnień:</h3>
+    
+    {% if all_groups %}
+    <div style="border: 1px solid #ccc; padding: 10px;">
+        {% for group in all_groups %}
+        <div>
+            <label>
+                <input type="checkbox" name="permission_groups" value="{{ group.pk }}"
+                    {% if group.pk in assigned_group_ids %}checked{% endif %}>
+                <strong>{{ group.name }}</strong>
+                {% if group.description %} - {{ group.description }}{% endif %}
+                <br>
+                <small>Uprawnienia: 
+                    {% for perm in group.permissions.all %}
+                        {{ perm.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        brak
+                    {% endfor %}
+                </small>
+            </label>
+        </div>
+        <hr>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>Brak grup uprawnień w systemie. <a href="{% url 'core:permission_group_create' %}">Dodaj grupę uprawnień</a> najpierw.</p>
+    {% endif %}
+    
+    <p>
+        <button type="submit">Zapisz</button>
+        <a href="{% url 'core:organization_structure' %}">Anuluj</a>
+    </p>
+</form>
+
+<hr>
+<p><a href="{% url 'core:organization_structure' %}">← Powrót do struktury organizacji</a></p>
+{% endblock %}

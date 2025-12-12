@@ -1,10 +1,48 @@
 {% extends "base.html" %}
 
+{% block title %}Logowanie - SZBI{% endblock %}
+
 {% block content %}
-<h2>Log In</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Log In</button>
+<h2>Logowanie do systemu SZBI</h2>
+
+{% if form.errors %}
+<div role="alert">
+    <strong>Błąd logowania!</strong>
+    <p>Nieprawidłowa nazwa użytkownika lub hasło. Spróbuj ponownie.</p>
+</div>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <p>Nie masz uprawnień do tej strony. Zaloguj się na konto z odpowiednimi uprawnieniami.</p>
+    {% else %}
+    <p>Zaloguj się, aby uzyskać dostęp do tej strony.</p>
+    {% endif %}
+{% endif %}
+
+<form method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+    
+    <p>
+        <label for="id_username">Nazwa użytkownika:</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+        <span>{{ form.username.errors }}</span>
+        {% endif %}
+    </p>
+    
+    <p>
+        <label for="id_password">Hasło:</label>
+        {{ form.password }}
+        {% if form.password.errors %}
+        <span>{{ form.password.errors }}</span>
+        {% endif %}
+    </p>
+    
+    <input type="hidden" name="next" value="{{ next }}">
+    
+    <p>
+        <button type="submit">Zaloguj się</button>
+    </p>
 </form>
 {% endblock %}

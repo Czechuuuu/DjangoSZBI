@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Uprawnienia pracownika - SZBI{% endblock %}
+
+{% block content %}
+<h1>Uprawnienia pracownika</h1>
+
+<p><a href="{% url 'core:employee_list' %}">← Powrót do listy</a></p>
+
+<h2>{{ employee.get_full_name }}</h2>
+
+<ul>
+    {% if employee.department %}<li>Dział: {{ employee.department.name }}</li>{% endif %}
+    {% if employee.positions.exists %}<li>Stanowiska: {{ employee.get_positions_display }}</li>{% endif %}
+</ul>
+
+<p><em>Uprawnienia pracownika są dziedziczone z przypisanego działu, stanowisk oraz bezpośrednio przypisanych grup.</em></p>
+
+{% if permissions_by_category %}
+    {% for category, perms in permissions_by_category.items %}
+    <h3>{{ category }}</h3>
+    <ul>
+        {% for perm in perms %}
+        <li>
+            <strong>{{ perm.name }}</strong>
+            {% if perm.description %} - {{ perm.description }}{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endfor %}
+{% else %}
+<p>Brak przypisanych uprawnień. Przypisz grupę uprawnień do działu, stanowiska lub bezpośrednio do pracownika.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Uprawnienia - SZBI{% endblock %}
+
+{% block content %}
+<h2>Zarządzanie uprawnieniami</h2>
+
+<h3>Grupy uprawnień</h3>
+<p>Grupy uprawnień definiują zestaw akcji, które można przypisać do stanowisk lub działów.</p>
+<p><a href="{% url 'core:permission_group_create' %}">+ Dodaj grupę uprawnień</a></p>
+
+{% if permission_groups %}
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Nazwa grupy</th>
+            <th>Opis</th>
+            <th>Liczba uprawnień</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for group in permission_groups %}
+        <tr>
+            <td><strong>{{ group.name }}</strong></td>
+            <td>{{ group.description|default:"-" }}</td>
+            <td>{{ group.permissions.count }}</td>
+            <td>
+                <a href="{% url 'core:permission_group_update' pk=group.pk %}">Edytuj</a> |
+                <a href="{% url 'core:permission_group_delete' pk=group.pk %}">Usuń</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Brak grup uprawnień. <a href="{% url 'core:permission_group_create' %}">Dodaj pierwszą grupę</a>.</p>
+{% endif %}
+
+<hr>
+
+<h3>Uprawnienia w systemie</h3>
+<p>Pojedyncze uprawnienia, które można grupować.</p>
+<p><a href="{% url 'core:permission_create' %}">+ Dodaj uprawnienie</a></p>
+
+{% if permissions %}
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Nazwa</th>
+            <th>Kategoria</th>
+            <th>Opis</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for perm in permissions %}
+        <tr>
+            <td>{{ perm.name }}</td>
+            <td>{{ perm.get_category_display }}</td>
+            <td>{{ perm.description|default:"-" }}</td>
+            <td>
+                <a href="{% url 'core:permission_update' pk=perm.pk %}">Edytuj</a> |
+                <a href="{% url 'core:permission_delete' pk=perm.pk %}">Usuń</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Brak uprawnień w systemie. <a href="{% url 'core:permission_create' %}">Dodaj pierwsze uprawnienie</a>.</p>
+{% endif %}
+
+<hr>
+<p><a href="{% url 'core:dashboard' %}">← Powrót do panelu głównego</a></p>
+{% endblock %}
