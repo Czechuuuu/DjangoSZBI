@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.urls import reverse
+from django.core.paginator import Paginator
+from django.db.models import Q
 
-from .models import Organization, Department, Position, Permission, PermissionGroup, PositionPermission, DepartmentPermission, Employee
+from .models import Organization, Department, Position, Permission, PermissionGroup, PositionPermission, DepartmentPermission, Employee, ActivityLog
 from .forms import OrganizationForm, DepartmentForm, PositionForm, PermissionForm, PermissionGroupForm, EmployeeForm
 
 
@@ -55,6 +57,8 @@ def organization_edit(request):
         form = OrganizationForm(request.POST, instance=organization)
         if form.is_valid():
             form.save()
+            log_activity(request, 'update', 'organization', organization, 
+                        f'Zaktualizowano dane organizacji "{organization.name}"')
             messages.success(request, 'Dane organizacji zostały zaktualizowane.')
             return redirect('core:organization_structure')
     else:
@@ -81,6 +85,8 @@ def department_create(request):
             department = form.save(commit=False)
             department.organization = organization
             department.save()
+            log_activity(request, 'create', 'department', department, 
+                        f'Utworzono dział "{department.name}"')
             messages.success(request, f'Dział "{department.name}" został utworzony.')
             return redirect('core:organization_structure')
     else:
@@ -104,6 +110,8 @@ def department_update(request, pk):
         form = DepartmentForm(request.POST, instance=department, organization=organization)
         if form.is_valid():
             form.save()
+            log_activity(request, 'update', 'department', department, 
+                        f'Zaktualizowano dział "{department.name}"')
             messages.success(request, f'Dział "{department.name}" został zaktualizowany.')
             return redirect('core:organization_structure')
     else:
@@ -126,7 +134,19 @@ def department_delete(request, pk):
     
     if request.method == 'POST':
         name = department.name
+        dept_id = department.pk
         department.delete()
+        # Logujemy po usunięciu z zachowanymi danymi
+        ActivityLog.log(
+            user=request.user,
+            action='delete',
+            category='department',
+            object_type='Department',
+            object_id=dept_id,
+            object_repr=name,
+            description=f'Usunięto dział "{name}"',
+            request=request
+        )
         messages.success(request, f'Dział "{name}" został usunięty.')
         return redirect('core:organization_structure')
     
@@ -152,6 +172,8 @@ def position_create_in_dept(request, dept_pk):
             position.organization = organization
             position.department = department
             position.save()
+            log_activity(request, 'create', 'position', position, 
+                        f'Utworzono stanowisko "{position.name}" w dziale "{department.name}"')
             messages.success(request, f'Stanowisko "{position.name}" zostało utworzone w dziale "{department.name}".')
             return redirect('core:organization_structure')
     else:
@@ -176,6 +198,8 @@ def position_update(request, pk):
         form = PositionForm(request.POST, instance=position)
         if form.is_valid():
             form.save()
+            log_activity(request, 'update', 'position', position, 
+                        f'Zaktualizowano stanowisko "{position.name}"')
             messages.success(request, f'Stanowisko "{position.name}" zostało zaktualizowane.')
             return redirect('core:organization_structure')
     else:
@@ -198,7 +222,18 @@ def position_delete(request, pk):
     
     if request.method == 'POST':
         name = position.name
+        pos_id = position.pk
         position.delete()
+        ActivityLog.log(
+            user=request.user,
+            action='delete',
+            category='position',
+            object_type='Position',
+            object_id=pos_id,
+            object_repr=name,
+            description=f'Usunięto stanowisko "{name}"',
+            request=request
+        )
         messages.success(request, f'Stanowisko "{name}" zostało usunięte.')
         return redirect('core:organization_structure')
     
@@ -231,6 +266,8 @@ def permission_create(request):
         form = PermissionForm(request.POST)
         if form.is_valid():
             permission = form.save()
+            log_activity(request, 'create', 'permission', permission, 
+                        f'Utworzono uprawnienie "{permission.name}"')
             messages.success(request, f'Uprawnienie "{permission.name}" zostało utworzone.')
             return redirect('core:permission_list')
     else:
@@ -252,6 +289,8 @@ def permission_update(request, pk):
         form = PermissionForm(request.POST, instance=permission)
         if form.is_valid():
             form.save()
+            log_activity(request, 'update', 'permission', permission, 
+                        f'Zaktualizowano uprawnienie "{permission.name}"')
             messages.success(request, f'Uprawnienie "{permission.name}" zostało zaktualizowane.')
             return redirect('core:permission_list')
     else:
@@ -272,7 +311,18 @@ def permission_delete(request, pk):
     
     if request.method == 'POST':
         name = permission.name
+        perm_id = permission.pk
         permission.delete()
+        ActivityLog.log(
+            user=request.user,
+            action='delete',
+            category='permission',
+            object_type='Permission',
+            object_id=perm_id,
+            object_repr=name,
+            description=f'Usunięto uprawnienie "{name}"',
+            request=request
+        )
         messages.success(request, f'Uprawnienie "{name}" zostało usunięte.')
         return redirect('core:permission_list')
     
@@ -291,6 +341,8 @@ def permission_group_create(request):
         form = PermissionGroupForm(request.POST)
         if form.is_valid():
             group = form.save()
+            log_activity(request, 'create', 'permission', group, 
+                        f'Utworzono grupę uprawnień "{group.name}"')
             messages.success(request, f'Grupa uprawnień "{group.name}" została utworzona.')
             return redirect('core:permission_list')
     else:
@@ -312,6 +364,8 @@ def permission_group_update(request, pk):
         form = PermissionGroupForm(request.POST, instance=group)
         if form.is_valid():
             form.save()
+            log_activity(request, 'update', 'permission', group, 
+                        f'Zaktualizowano grupę uprawnień "{group.name}"')
             messages.success(request, f'Grupa uprawnień "{group.name}" została zaktualizowana.')
             return redirect('core:permission_list')
     else:
@@ -332,7 +386,18 @@ def permission_group_delete(request, pk):
     
     if request.method == 'POST':
         name = group.name
+        group_id = group.pk
         group.delete()
+        ActivityLog.log(
+            user=request.user,
+            action='delete',
+            category='permission',
+            object_type='PermissionGroup',
+            object_id=group_id,
+            object_repr=name,
+            description=f'Usunięto grupę uprawnień "{name}"',
+            request=request
+        )
         messages.success(request, f'Grupa uprawnień "{name}" została usunięta.')
         return redirect('core:permission_list')
     
@@ -431,7 +496,9 @@ def employee_create(request):
     if request.method == 'POST':
         form = EmployeeForm(request.POST, organization=organization)
         if form.is_valid():
-            form.save()
+            employee = form.save()
+            log_activity(request, 'create', 'employee', employee, 
+                        f'Utworzono pracownika "{employee.get_full_name()}"')
             messages.success(request, f'Pracownik "{form.cleaned_data["first_name"]} {form.cleaned_data["last_name"]}" został dodany.')
             return redirect('core:employee_list')
     else:
@@ -454,6 +521,8 @@ def employee_update(request, pk):
         form = EmployeeForm(request.POST, instance=employee, organization=organization)
         if form.is_valid():
             form.save()
+            log_activity(request, 'update', 'employee', employee, 
+                        f'Zaktualizowano dane pracownika "{employee.get_full_name()}"')
             messages.success(request, f'Dane pracownika "{employee.get_full_name()}" zostały zaktualizowane.')
             return redirect('core:employee_list')
     else:
@@ -475,8 +544,19 @@ def employee_delete(request, pk):
     if request.method == 'POST':
         user = employee.user
         name = employee.get_full_name()
+        emp_id = employee.pk
         employee.delete()
         user.delete()  # Usuń też konto użytkownika
+        ActivityLog.log(
+            user=request.user,
+            action='delete',
+            category='employee',
+            object_type='Employee',
+            object_id=emp_id,
+            object_repr=name,
+            description=f'Usunięto pracownika "{name}"',
+            request=request
+        )
         messages.success(request, f'Pracownik "{name}" został usunięty.')
         return redirect('core:employee_list')
     
@@ -504,3 +584,107 @@ def employee_permissions(request, pk):
         'employee': employee,
         'permissions_by_category': permissions_by_category,
     })
+
+
+# ============== DZIENNIK ZDARZEŃ ==============
+
+@login_required
+@user_passes_test(is_admin)
+def activity_log_list(request):
+    """Lista zdarzeń w dzienniku z filtrowaniem i paginacją"""
+    logs = ActivityLog.objects.select_related('user').all()
+    
+    # Filtrowanie po kategorii
+    category = request.GET.get('category')
+    if category:
+        logs = logs.filter(category=category)
+    
+    # Filtrowanie po akcji
+    action = request.GET.get('action')
+    if action:
+        logs = logs.filter(action=action)
+    
+    # Filtrowanie po użytkowniku
+    user_id = request.GET.get('user')
+    if user_id:
+        logs = logs.filter(user_id=user_id)
+    
+    # Filtrowanie po dacie od
+    date_from = request.GET.get('date_from')
+    if date_from:
+        logs = logs.filter(created_at__date__gte=date_from)
+    
+    # Filtrowanie po dacie do
+    date_to = request.GET.get('date_to')
+    if date_to:
+        logs = logs.filter(created_at__date__lte=date_to)
+    
+    # Wyszukiwanie tekstowe
+    search = request.GET.get('search')
+    if search:
+        logs = logs.filter(
+            Q(object_repr__icontains=search) |
+            Q(description__icontains=search) |
+            Q(user__username__icontains=search)
+        )
+    
+    # Paginacja
+    paginator = Paginator(logs, 50)  # 50 zdarzeń na stronę
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Pobierz unikalne wartości do filtrów
+    from django.contrib.auth.models import User
+    users = User.objects.filter(activity_logs__isnull=False).distinct()
+    
+    return render(request, 'core/activity_log_list.html', {
+        'page_obj': page_obj,
+        'logs': page_obj,
+        'categories': ActivityLog.CATEGORY_CHOICES,
+        'actions': ActivityLog.ACTION_CHOICES,
+        'users': users,
+        'current_filters': {
+            'category': category,
+            'action': action,
+            'user': user_id,
+            'date_from': date_from,
+            'date_to': date_to,
+            'search': search,
+        }
+    })
+
+
+# ============== FUNKCJE POMOCNICZE DO LOGOWANIA ==============
+
+def log_activity(request, action, category, obj, description, details=None):
+    """
+    Funkcja pomocnicza do logowania zdarzeń.
+    
+    Args:
+        request: Obiekt request
+        action: Typ akcji (create, update, delete, itp.)
+        category: Kategoria zdarzenia
+        obj: Obiekt, którego dotyczy zdarzenie (lub None)
+        description: Opis zdarzenia
+        details: Dodatkowe szczegóły jako dict (opcjonalne)
+    """
+    if obj:
+        object_type = obj.__class__.__name__
+        object_id = obj.pk if hasattr(obj, 'pk') else None
+        object_repr = str(obj)
+    else:
+        object_type = 'System'
+        object_id = None
+        object_repr = '-'
+    
+    ActivityLog.log(
+        user=request.user if request.user.is_authenticated else None,
+        action=action,
+        category=category,
+        object_type=object_type,
+        object_id=object_id,
+        object_repr=object_repr,
+        description=description,
+        details=details,
+        request=request
+    )

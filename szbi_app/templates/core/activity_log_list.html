@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Dziennik zdarzeń - SZBI{% endblock %}
+
+{% block content %}
+<h2>Dziennik zdarzeń</h2>
+
+<p>Historia operacji wykonywanych w systemie.</p>
+
+<!-- Filtry -->
+<details style="margin-bottom: 20px; padding: 10px; border: 1px solid #ccc;">
+    <summary style="cursor: pointer; font-weight: bold;">Filtry</summary>
+    <form method="get" style="margin-top: 15px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div>
+                <label for="category"><strong>Kategoria:</strong></label><br>
+                <select name="category" id="category" style="width: 100%; padding: 5px;">
+                    <option value="">-- Wszystkie --</option>
+                    {% for value, label in categories %}
+                    <option value="{{ value }}" {% if current_filters.category == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="action"><strong>Akcja:</strong></label><br>
+                <select name="action" id="action" style="width: 100%; padding: 5px;">
+                    <option value="">-- Wszystkie --</option>
+                    {% for value, label in actions %}
+                    <option value="{{ value }}" {% if current_filters.action == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="user"><strong>Użytkownik:</strong></label><br>
+                <select name="user" id="user" style="width: 100%; padding: 5px;">
+                    <option value="">-- Wszyscy --</option>
+                    {% for u in users %}
+                    <option value="{{ u.id }}" {% if current_filters.user == u.id|stringformat:"i" %}selected{% endif %}>{{ u.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label for="date_from"><strong>Data od:</strong></label><br>
+                <input type="date" name="date_from" id="date_from" value="{{ current_filters.date_from|default:'' }}" style="width: 100%; padding: 5px;">
+            </div>
+            
+            <div>
+                <label for="date_to"><strong>Data do:</strong></label><br>
+                <input type="date" name="date_to" id="date_to" value="{{ current_filters.date_to|default:'' }}" style="width: 100%; padding: 5px;">
+            </div>
+            
+            <div>
+                <label for="search"><strong>Szukaj:</strong></label><br>
+                <input type="text" name="search" id="search" value="{{ current_filters.search|default:'' }}" placeholder="Wpisz tekst..." style="width: 100%; padding: 5px;">
+            </div>
+        </div>
+        
+        <div style="margin-top: 15px;">
+            <button type="submit" style="padding: 8px 20px;">Filtruj</button>
+            <a href="{% url 'core:activity_log_list' %}" style="margin-left: 10px;">Wyczyść filtry</a>
+        </div>
+    </form>
+</details>
+
+<!-- Statystyki -->
+<p>
+    <strong>Znaleziono:</strong> {{ page_obj.paginator.count }} zdarzeń
+    {% if page_obj.paginator.num_pages > 1 %}
+    | Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }}
+    {% endif %}
+</p>
+
+<!-- Tabela zdarzeń -->
+{% if logs %}
+<table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead style="background-color: #f0f0f0;">
+        <tr>
+            <th>Data i czas</th>
+            <th>Użytkownik</th>
+            <th>Akcja</th>
+            <th>Kategoria</th>
+            <th>Obiekt</th>
+            <th>Opis</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td style="white-space: nowrap;">{{ log.created_at|date:"Y-m-d H:i:s" }}</td>
+            <td>
+                {% if log.user %}
+                    {{ log.user.username }}
+                {% else %}
+                    <em>System</em>
+                {% endif %}
+            </td>
+            <td>
+                {% if log.action == 'create' %}
+                    <span style="color: green;">{{ log.get_action_display }}</span>
+                {% elif log.action == 'update' %}
+                    <span style="color: blue;">{{ log.get_action_display }}</span>
+                {% elif log.action == 'delete' %}
+                    <span style="color: red;">{{ log.get_action_display }}</span>
+                {% elif log.action == 'assign' %}
+                    <span style="color: purple;">{{ log.get_action_display }}</span>
+                {% elif log.action == 'unassign' %}
+                    <span style="color: orange;">{{ log.get_action_display }}</span>
+                {% elif log.action == 'login' %}
+                    <span style="color: teal;">{{ log.get_action_display }}</span>
+                {% elif log.action == 'logout' %}
+                    <span style="color: gray;">{{ log.get_action_display }}</span>
+                {% else %}
+                    {{ log.get_action_display }}
+                {% endif %}
+            </td>
+            <td>{{ log.get_category_display }}</td>
+            <td>
+                <strong>{{ log.object_repr }}</strong>
+                <br><small style="color: #666;">{{ log.object_type }}</small>
+            </td>
+            <td>{{ log.description|truncatewords:15 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Paginacja -->
+{% if page_obj.paginator.num_pages > 1 %}
+<div style="margin-top: 20px; text-align: center;">
+    <nav>
+        {% if page_obj.has_previous %}
+            <a href="?page=1{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Pierwsza</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Poprzednia</a>
+        {% endif %}
+        
+        <span style="margin: 0 15px;">
+            Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Następna</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Ostatnia</a>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}
+
+{% else %}
+<p><em>Brak zdarzeń spełniających podane kryteria.</em></p>
+{% endif %}
+
+<hr>
+
+<p>
+    <a href="{% url 'core:dashboard' %}">← Powrót do panelu głównego</a>
+</p>
+
+{% endblock %}

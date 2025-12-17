@@ -40,4 +40,7 @@ urlpatterns = [
     path('pracownicy/<int:pk>/edytuj/', views.employee_update, name='employee_update'),
     path('pracownicy/<int:pk>/usun/', views.employee_delete, name='employee_delete'),
     path('pracownicy/<int:pk>/uprawnienia/', views.employee_permissions, name='employee_permissions'),
+    
+    # Dziennik zdarzeń
+    path('dziennik/', views.activity_log_list, name='activity_log_list'),
 ]

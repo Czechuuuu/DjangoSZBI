@@ -308,3 +308,150 @@ class DepartmentPermission(models.Model):
 
     def __str__(self):
         return f"{self.department.name} - {self.permission_group.name}"
+
+
+# ============== DZIENNIK ZDARZEŃ ==============
+
+class ActivityLog(models.Model):
+    """Model dziennika zdarzeń - rejestruje wszystkie operacje w systemie"""
+    ACTION_CHOICES = [
+        ('create', 'Utworzenie'),
+        ('update', 'Modyfikacja'),
+        ('delete', 'Usunięcie'),
+        ('assign', 'Przypisanie'),
+        ('unassign', 'Cofnięcie przypisania'),
+        ('login', 'Logowanie'),
+        ('logout', 'Wylogowanie'),
+        ('view', 'Wyświetlenie'),
+        ('export', 'Eksport'),
+        ('import', 'Import'),
+        ('other', 'Inne'),
+    ]
+    
+    CATEGORY_CHOICES = [
+        ('organization', 'Organizacja'),
+        ('department', 'Dział'),
+        ('position', 'Stanowisko'),
+        ('employee', 'Pracownik'),
+        ('permission', 'Uprawnienia'),
+        ('document', 'Dokument'),
+        ('asset', 'Aktywo'),
+        ('incident', 'Incydent'),
+        ('audit', 'Audyt'),
+        ('system', 'System'),
+        ('auth', 'Autoryzacja'),
+    ]
+    
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='activity_logs',
+        verbose_name="Użytkownik"
+    )
+    action = models.CharField(
+        max_length=20,
+        choices=ACTION_CHOICES,
+        verbose_name="Akcja"
+    )
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        verbose_name="Kategoria"
+    )
+    object_type = models.CharField(
+        max_length=100,
+        verbose_name="Typ obiektu",
+        help_text="Nazwa modelu, np. 'Employee', 'Department'"
+    )
+    object_id = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name="ID obiektu"
+    )
+    object_repr = models.CharField(
+        max_length=255,
+        verbose_name="Reprezentacja obiektu",
+        help_text="Tekstowa reprezentacja obiektu, np. nazwa pracownika"
+    )
+    description = models.TextField(
+        verbose_name="Opis zdarzenia"
+    )
+    details = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name="Szczegóły",
+        help_text="Dodatkowe informacje w formacie JSON"
+    )
+    ip_address = models.GenericIPAddressField(
+        null=True,
+        blank=True,
+        verbose_name="Adres IP"
+    )
+    user_agent = models.TextField(
+        blank=True,
+        verbose_name="User Agent"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Data zdarzenia"
+    )
+
+    class Meta:
+        verbose_name = "Zdarzenie"
+        verbose_name_plural = "Dziennik zdarzeń"
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['category', '-created_at']),
+            models.Index(fields=['action', '-created_at']),
+        ]
+
+    def __str__(self):
+        user_str = self.user.username if self.user else "System"
+        return f"[{self.created_at.strftime('%Y-%m-%d %H:%M')}] {user_str}: {self.get_action_display()} - {self.object_repr}"
+
+    @classmethod
+    def log(cls, user, action, category, object_type, object_repr, description, 
+            object_id=None, details=None, request=None):
+        """
+        Metoda pomocnicza do tworzenia wpisów w dzienniku zdarzeń.
+        
+        Args:
+            user: Użytkownik wykonujący akcję
+            action: Typ akcji (create, update, delete, itp.)
+            category: Kategoria zdarzenia (employee, department, itp.)
+            object_type: Nazwa typu/modelu obiektu
+            object_repr: Tekstowa reprezentacja obiektu
+            description: Opis zdarzenia
+            object_id: ID obiektu (opcjonalne)
+            details: Dodatkowe szczegóły jako dict (opcjonalne)
+            request: Obiekt request do pobrania IP i User-Agent (opcjonalne)
+        """
+        ip_address = None
+        user_agent = ''
+        
+        if request:
+            # Pobierz IP (uwzględniając proxy)
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                ip_address = x_forwarded_for.split(',')[0].strip()
+            else:
+                ip_address = request.META.get('REMOTE_ADDR')
+            
+            user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]
+        
+        return cls.objects.create(
+            user=user,
+            action=action,
+            category=category,
+            object_type=object_type,
+            object_id=object_id,
+            object_repr=object_repr,
+            description=description,
+            details=details,
+            ip_address=ip_address,
+            user_agent=user_agent
+        )

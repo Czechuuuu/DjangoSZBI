@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Organization, Department, Position, Permission, PermissionGroup, PositionPermission, DepartmentPermission, Employee, EmployeePermissionGroup
+from .models import Organization, Department, Position, Permission, PermissionGroup, PositionPermission, DepartmentPermission, Employee, EmployeePermissionGroup, ActivityLog
 
 
 @admin.register(Organization)
@@ -67,3 +67,23 @@ class EmployeeAdmin(admin.ModelAdmin):
 class EmployeePermissionGroupAdmin(admin.ModelAdmin):
     list_display = ['employee', 'permission_group', 'created_at']
     list_filter = ['permission_group']
+
+
+@admin.register(ActivityLog)
+class ActivityLogAdmin(admin.ModelAdmin):
+    list_display = ['created_at', 'user', 'action', 'category', 'object_repr', 'ip_address']
+    list_filter = ['action', 'category', 'created_at', 'user']
+    search_fields = ['object_repr', 'description', 'user__username']
+    readonly_fields = ['user', 'action', 'category', 'object_type', 'object_id', 'object_repr', 
+                       'description', 'details', 'ip_address', 'user_agent', 'created_at']
+    ordering = ['-created_at']
+    date_hierarchy = 'created_at'
+    
+    def has_add_permission(self, request):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
