@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ object.title }} - SZBI{% endblock %}
+
+{% block content %}
+<h2>{{ object.title }}</h2>
+
+<div>
+    <a href="{% url 'documents:list' %}">← Powrót do listy</a>
+    |
+    <a href="{% url 'documents:update' object.pk %}">Edytuj</a>
+</div>
+
+<!-- Informacje o dokumencie -->
+<table border="1" cellpadding="15" cellspacing="0">
+    <tr>
+        <th>Tytuł</th>
+        <td><strong>{{ object.title }}</strong></td>
+    </tr>
+    <tr>
+        <th>Status</th>
+        <td>{{ object.get_status_display }}</td>
+    </tr>
+    {% if object.description %}
+    <tr>
+        <th>Opis</th>
+        <td>{{ object.description|linebreaks }}</td>
+    </tr>
+    {% endif %}
+    <tr>
+        <th>Właściciel</th>
+        <td>{{ object.owner.username }}</td>
+    </tr>
+    <tr>
+        <th>Data utworzenia</th>
+        <td>{{ object.created_at|date:"Y-m-d H:i" }}</td>
+    </tr>
+    <tr>
+        <th>Ostatnia modyfikacja</th>
+        <td>{{ object.updated_at|date:"Y-m-d H:i" }}</td>
+    </tr>
+</table>
+
+<!-- Powiązane wymagania ISO -->
+<h3>Powiązane wymagania ISO</h3>
+
+<p>
+    <a href="{% url 'documents:add_iso_mapping' object.pk %}">+ Dodaj powiązanie z ISO</a>
+</p>
+
+{% if iso_mappings %}
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>ID ISO</th>
+            <th>Nazwa wymagania</th>
+            <th>Typ powiązania</th>
+            <th>Sekcja dokumentu</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for mapping in iso_mappings %}
+        <tr>
+            <td>
+                <a href="{% url 'dictionary:iso_requirement_detail' mapping.iso_requirement.pk %}">
+                    <strong>{{ mapping.iso_requirement.iso_id }}</strong>
+                </a>
+            </td>
+            <td>
+                {{ mapping.iso_requirement.name|truncatewords:15 }}
+                {% if mapping.notes %}
+                <br><small><em>{{ mapping.notes }}</em></small>
+                {% endif %}
+            </td>
+            <td>{{ mapping.get_mapping_type_display }}</td>
+            <td>{{ mapping.section_reference|default:"-" }}</td>
+            <td>
+                <a href="{% url 'documents:remove_iso_mapping' object.pk mapping.pk %}">Usuń</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p><em>Ten dokument nie jest jeszcze powiązany z żadnymi wymaganiami ISO.</em></p>
+{% endif %}
+
+{% endblock %}

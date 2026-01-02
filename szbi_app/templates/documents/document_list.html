@@ -1,10 +1,51 @@
 {% extends "base.html" %}
 
+{% block title %}Dokumenty - SZBI{% endblock %}
+
 {% block content %}
-<h2>Lista dokumentów</h2>
-<ul>
-    {% for doc in object_list %}
-        <li>{{ doc.title }} – status: {{ doc.status }}</li>
-    {% endfor %}
-</ul>
+<h2>Dokumenty</h2>
+
+<p>
+    <a href="{% url 'documents:create' %}">+ Dodaj dokument</a>
+</p>
+
+{% if object_list %}
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Tytuł</th>
+            <th>Status</th>
+            <th>Wymagania ISO</th>
+            <th>Właściciel</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for doc in object_list %}
+        <tr>
+            <td>
+                <a href="{% url 'documents:detail' doc.pk %}"><strong>{{ doc.title }}</strong></a>
+                {% if doc.description %}
+                <br><small>{{ doc.description|truncatewords:15 }}</small>
+                {% endif %}
+            </td>
+            <td>
+                {{ doc.get_status_display }}
+            </td>
+            <td>
+                {{ doc.get_iso_requirements_count }}
+            </td>
+            <td>{{ doc.owner.username }}</td>
+            <td>
+                <a href="{% url 'documents:detail' doc.pk %}">Szczegóły</a> |
+                <a href="{% url 'documents:update' doc.pk %}">Edytuj</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p><em>Brak dokumentów w systemie.</em></p>
+{% endif %}
+
 {% endblock %}

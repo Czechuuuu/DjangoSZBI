@@ -210,23 +210,34 @@ class EmployeePermissionGroup(models.Model):
 # ============== UPRAWNIENIA ==============
 
 class Permission(models.Model):
-    """Model pojedynczego uprawnienia w systemie"""
+    """Model pojedynczego uprawnienia w systemie - uprawnienia są predefiniowane"""
     CATEGORY_CHOICES = [
-        ('documents', 'Dokumenty'),
-        ('assets', 'Aktywa'),
-        ('incidents', 'Incydenty'),
         ('audits', 'Audyty'),
-        ('organization', 'Organizacja'),
-        ('system', 'System'),
+        ('compliance', 'Deklaracje zgodności'),
+        ('documents', 'Dokumenty'),
+        ('activity_log', 'Dziennik zdarzeń'),
+        ('incidents', 'Incydenty bezpieczeństwa'),
+        ('configuration', 'Konfiguracja'),
+        ('assets', 'Rejestr aktywów'),
+        ('dictionary', 'Wymagania standardów i przepisów'),
+        ('logs', 'Logi'),
+        ('organization', 'Podmioty / Organizacja'),
+        ('users', 'Użytkownicy'),
+        ('permissions', 'Uprawnienia'),
     ]
     
-    name = models.CharField(max_length=255, verbose_name="Nazwa uprawnienia")
+    name = models.CharField(max_length=255, verbose_name="Nazwa uprawnienia", unique=True)
     description = models.TextField(verbose_name="Opis", blank=True)
     category = models.CharField(
         max_length=50, 
         choices=CATEGORY_CHOICES, 
-        default='system',
+        default='configuration',
         verbose_name="Kategoria"
+    )
+    is_system = models.BooleanField(
+        default=True,
+        verbose_name="Uprawnienie systemowe",
+        help_text="Uprawnienia systemowe są predefiniowane i nie można ich usunąć"
     )
 
     class Meta:

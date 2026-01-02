@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Wymagania ISO - SZBI{% endblock %}
+
+{% block content %}
+<h2>Wymagania ISO 27001</h2>
+
+<!-- Przyciski akcji -->
+<p>
+    <a href="{% url 'dictionary:iso_requirement_create' %}">+ Dodaj wymaganie ISO</a>
+    | <a href="{% url 'dictionary:compliance_matrix' %}">Macierz zgodności</a>
+</p>
+
+<!-- Statystyki -->
+<p>
+    <strong>Statystyki:</strong>
+    Razem: <strong>{{ stats.total }}</strong> |
+    Stosujemy: <strong>{{ stats.applied }}</strong> |
+    Nie stosujemy: <strong>{{ stats.not_applied }}</strong> |
+    Częściowo: <strong>{{ stats.partial }}</strong> |
+    Nie dotyczy: <strong>{{ stats.not_applicable }}</strong>
+</p>
+
+<!-- Filtry -->
+<form method="get">
+    <label for="search">Szukaj:</label>
+    <input type="text" id="search" name="search" value="{{ search }}" placeholder="ID, nazwa, opis...">
+    
+    <label for="status">Status:</label>
+    <select id="status" name="status">
+        <option value="">-- Wszystkie --</option>
+        {% for value, label in status_choices %}
+        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    
+    <label for="category">Kategoria:</label>
+    <select id="category" name="category">
+        <option value="">-- Wszystkie --</option>
+        {% for cat in categories %}
+        <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+    </select>
+    
+    <button type="submit">Filtruj</button>
+    <a href="{% url 'dictionary:iso_requirement_list' %}">Wyczyść</a>
+</form>
+
+<hr>
+
+<!-- Tabela wymagań -->
+{% if requirements %}
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nazwa zabezpieczenia</th>
+            <th>Czy stosujemy?</th>
+            <th>Sposób realizacji / Dokument referencyjny</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for req in requirements %}
+        <tr>
+            <td><strong>{{ req.iso_id }}</strong></td>
+            <td>
+                <a href="{% url 'dictionary:iso_requirement_detail' req.pk %}">{{ req.name }}</a>
+                {% if req.category %}
+                <br><small>{{ req.category }}</small>
+                {% endif %}
+            </td>
+            <td>
+                {% if req.is_applied == 'yes' %}
+                    ✓ Tak
+                {% elif req.is_applied == 'no' %}
+                    ✗ Nie
+                {% elif req.is_applied == 'partial' %}
+                    ◐ Częściowo
+                {% else %}
+                    N/D
+                {% endif %}
+            </td>
+            <td>
+                {% if req.implementation_method %}
+                    {{ req.implementation_method|truncatewords:30 }}
+                {% else %}
+                    <em>Brak</em>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{% url 'dictionary:iso_requirement_detail' req.pk %}">Szczegóły</a> |
+                <a href="{% url 'dictionary:iso_requirement_update' req.pk %}">Edytuj</a> |
+                <a href="{% url 'dictionary:iso_requirement_delete' req.pk %}">Usuń</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Paginacja -->
+{% if requirements.has_other_pages %}
+<p>
+    {% if requirements.has_previous %}
+        <a href="?page=1{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}">« Pierwsza</a>
+        <a href="?page={{ requirements.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}">‹ Poprzednia</a>
+    {% endif %}
+    
+    Strona {{ requirements.number }} z {{ requirements.paginator.num_pages }}
+    
+    {% if requirements.has_next %}
+        <a href="?page={{ requirements.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}">Następna ›</a>
+        <a href="?page={{ requirements.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}">Ostatnia »</a>
+    {% endif %}
+</p>
+{% endif %}
+
+{% else %}
+<p><em>Brak wymagań ISO w systemie. Dodaj pierwsze wymaganie używając przycisku powyżej.</em></p>
+{% endif %}
+
+{% endblock %}

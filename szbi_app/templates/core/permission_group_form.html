@@ -10,37 +10,56 @@
     
     <table>
         <tr>
-            <td><label for="id_name">Nazwa grupy:</label></td>
+            <td><label for="id_name"><strong>Nazwa grupy: *</strong></label></td>
             <td>
                 {{ form.name }}
                 {% if form.name.errors %}
-                <br><span style="color: red;">{{ form.name.errors }}</span>
+                <br><span>{{ form.name.errors }}</span>
                 {% endif %}
             </td>
         </tr>
         <tr>
-            <td><label for="id_description">Opis:</label></td>
+            <td><label for="id_description"><strong>Opis:</strong></label></td>
             <td>
                 {{ form.description }}
                 {% if form.description.errors %}
-                <br><span style="color: red;">{{ form.description.errors }}</span>
+                <br><span>{{ form.description.errors }}</span>
                 {% endif %}
             </td>
         </tr>
     </table>
     
     <h3>Wybierz uprawnienia dla tej grupy:</h3>
+    <p>Zaznacz uprawnienia, które mają być przypisane do tej grupy.</p>
     
-    {% if form.permissions.field.queryset %}
-    <div style="border: 1px solid #ccc; padding: 10px; max-height: 300px; overflow-y: auto;">
-        {{ form.permissions }}
+    {% if form.permissions_by_category %}
+    <div>
+        {% for category_code, category_data in form.permissions_by_category.items %}
+        <div>
+            <h4>{{ category_data.label }}</h4>
+            <div>
+                {% for perm in category_data.permissions %}
+                <div>
+                    <label>
+                        <input type="checkbox" name="permissions" value="{{ perm.pk }}" 
+                               {% if perm.pk in form.permissions.value %}checked{% endif %}>
+                        <strong>{{ perm.name }}</strong>
+                        {% if perm.description %}
+                        - <small>{{ perm.description }}</small>
+                        {% endif %}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
     </div>
     {% else %}
-    <p>Brak uprawnień w systemie. <a href="{% url 'core:permission_create' %}">Dodaj uprawnienia</a> najpierw.</p>
+    <p><em>Brak uprawnień w systemie.</em></p>
     {% endif %}
     
     <p>
-        <button type="submit">Zapisz</button>
+        <button type="submit">Zapisz grupę</button>
         <a href="{% url 'core:permission_list' %}">Anuluj</a>
     </p>
 </form>

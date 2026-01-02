@@ -248,13 +248,26 @@ def position_delete(request, pk):
 @login_required
 @user_passes_test(is_admin)
 def permission_list(request):
-    """Lista uprawnień w systemie"""
-    permissions = Permission.objects.all()
-    permission_groups = PermissionGroup.objects.all()
+    """Lista uprawnień w systemie - uprawnienia są predefiniowane, tylko do odczytu"""
+    permissions = Permission.objects.all().order_by('category', 'name')
+    permission_groups = PermissionGroup.objects.prefetch_related('permissions').all()
+    
+    # Grupuj uprawnienia według kategorii
+    permissions_by_category = {}
+    for perm in permissions:
+        cat = perm.category
+        cat_display = perm.get_category_display()
+        if cat not in permissions_by_category:
+            permissions_by_category[cat] = {
+                'label': cat_display,
+                'permissions': []
+            }
+        permissions_by_category[cat]['permissions'].append(perm)
     
     return render(request, 'core/permission_list.html', {
-        'permissions': permissions,
+        'permissions_by_category': permissions_by_category,
         'permission_groups': permission_groups,
+        'total_permissions': permissions.count(),
     })
 
 

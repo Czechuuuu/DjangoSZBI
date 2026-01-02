@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - SZBI{% endblock %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <table>
+        <tr>
+            <td><label for="id_iso_id"><strong>ID zabezpieczenia: *</strong></label></td>
+            <td>
+                {{ form.iso_id }}
+                {% if form.iso_id.errors %}
+                    <br><span>{{ form.iso_id.errors.0 }}</span>
+                {% endif %}
+                <br><small>{{ form.iso_id.help_text }}</small>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_name"><strong>Nazwa zabezpieczenia: *</strong></label></td>
+            <td>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <br><span>{{ form.name.errors.0 }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_category"><strong>Kategoria:</strong></label></td>
+            <td>
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <br><span>{{ form.category.errors.0 }}</span>
+                {% endif %}
+                <br><small>{{ form.category.help_text }}</small>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_description"><strong>Opis zabezpieczenia:</strong></label></td>
+            <td>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <br><span>{{ form.description.errors.0 }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_is_applied"><strong>Czy stosujemy? *</strong></label></td>
+            <td>
+                {{ form.is_applied }}
+                {% if form.is_applied.errors %}
+                    <br><span>{{ form.is_applied.errors.0 }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_implementation_method"><strong>Sposób realizacji / Dokument referencyjny:</strong></label></td>
+            <td>
+                {{ form.implementation_method }}
+                {% if form.implementation_method.errors %}
+                    <br><span>{{ form.implementation_method.errors.0 }}</span>
+                {% endif %}
+                <br><small>{{ form.implementation_method.help_text }}</small>
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_notes"><strong>Uwagi:</strong></label></td>
+            <td>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <br><span>{{ form.notes.errors.0 }}</span>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+    
+    <p>
+        <button type="submit">{% if is_edit %}Zapisz zmiany{% else %}Dodaj wymaganie{% endif %}</button>
+        <a href="{% url 'dictionary:iso_requirement_list' %}">Anuluj</a>
+    </p>
+</form>
+
+{% endblock %}

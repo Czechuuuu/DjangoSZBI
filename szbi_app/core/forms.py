@@ -62,7 +62,7 @@ class PermissionForm(forms.ModelForm):
 
 
 class PermissionGroupForm(forms.ModelForm):
-    """Formularz grupy uprawnień"""
+    """Formularz grupy uprawnień z uprawnieniami pogrupowanymi według kategorii"""
     
     class Meta:
         model = PermissionGroup
@@ -71,6 +71,23 @@ class PermissionGroupForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 3}),
             'permissions': forms.CheckboxSelectMultiple(),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Sortuj uprawnienia według kategorii i nazwy
+        self.fields['permissions'].queryset = Permission.objects.all().order_by('category', 'name')
+        
+        # Przygotuj uprawnienia pogrupowane według kategorii dla szablonu
+        self.permissions_by_category = {}
+        for perm in self.fields['permissions'].queryset:
+            cat = perm.category
+            cat_display = perm.get_category_display()
+            if cat not in self.permissions_by_category:
+                self.permissions_by_category[cat] = {
+                    'label': cat_display,
+                    'permissions': []
+                }
+            self.permissions_by_category[cat]['permissions'].append(perm)
 
 
 class EmployeeForm(forms.ModelForm):

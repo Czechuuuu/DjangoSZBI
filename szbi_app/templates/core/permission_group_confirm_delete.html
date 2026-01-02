@@ -8,7 +8,7 @@
 <p>Czy na pewno chcesz usunąć grupę uprawnień <strong>{{ group.name }}</strong>?</p>
 
 {% if group.position_assignments.exists or group.department_assignments.exists %}
-<div style="border: 1px solid red; padding: 10px; margin: 10px 0;">
+<div>
     <strong>Uwaga!</strong> Ta grupa uprawnień jest przypisana do:
     <ul>
         {% if group.position_assignments.exists %}

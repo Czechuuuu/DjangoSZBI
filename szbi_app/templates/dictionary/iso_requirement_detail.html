@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ iso_req.iso_id }} - Wymaganie ISO - SZBI{% endblock %}
+
+{% block content %}
+<h2>Wymaganie ISO: {{ iso_req.iso_id }}</h2>
+
+<p>
+    <a href="{% url 'dictionary:iso_requirement_list' %}">← Powrót do listy</a>
+    | <a href="{% url 'dictionary:iso_requirement_update' iso_req.pk %}">Edytuj</a>
+    | <a href="{% url 'dictionary:iso_requirement_delete' iso_req.pk %}">Usuń</a>
+</p>
+
+<table border="1" cellpadding="15" cellspacing="0">
+    <tr>
+        <th>ID zabezpieczenia</th>
+        <td><strong>{{ iso_req.iso_id }}</strong></td>
+    </tr>
+    <tr>
+        <th>Nazwa zabezpieczenia</th>
+        <td>{{ iso_req.name }}</td>
+    </tr>
+    {% if iso_req.category %}
+    <tr>
+        <th>Kategoria</th>
+        <td>{{ iso_req.category }}</td>
+    </tr>
+    {% endif %}
+    {% if iso_req.description %}
+    <tr>
+        <th>Opis zabezpieczenia</th>
+        <td>{{ iso_req.description|linebreaks }}</td>
+    </tr>
+    {% endif %}
+    <tr>
+        <th>Czy stosujemy?</th>
+        <td>
+            {% if iso_req.is_applied == 'yes' %}
+                ✓ Tak
+            {% elif iso_req.is_applied == 'no' %}
+                ✗ Nie
+            {% elif iso_req.is_applied == 'partial' %}
+                ◐ Częściowo
+            {% else %}
+                — Nie dotyczy
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th>Sposób realizacji / Dokument referencyjny</th>
+        <td>
+            {% if iso_req.implementation_method %}
+                {{ iso_req.implementation_method|linebreaks }}
+            {% else %}
+                <em>Nie określono</em>
+            {% endif %}
+        </td>
+    </tr>
+    {% if iso_req.notes %}
+    <tr>
+        <th>Uwagi</th>
+        <td>{{ iso_req.notes|linebreaks }}</td>
+    </tr>
+    {% endif %}
+    <tr>
+        <th>Data utworzenia</th>
+        <td>
+            {{ iso_req.created_at|date:"Y-m-d H:i" }}
+            {% if iso_req.created_by %}
+                (przez {{ iso_req.created_by.username }})
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th>Ostatnia modyfikacja</th>
+        <td>
+            {{ iso_req.updated_at|date:"Y-m-d H:i" }}
+            {% if iso_req.updated_by %}
+                (przez {{ iso_req.updated_by.username }})
+            {% endif %}
+        </td>
+    </tr>
+</table>
+
+<!-- Powiązane dokumenty -->
+<h3>Powiązane dokumenty</h3>
+
+{% if document_mappings %}
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Dokument</th>
+            <th>Typ powiązania</th>
+            <th>Sekcja</th>
+            <th>Status dokumentu</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for mapping in document_mappings %}
+        <tr>
+            <td>
+                <a href="{% url 'documents:detail' mapping.document.pk %}">
+                    <strong>{{ mapping.document.title }}</strong>
+                </a>
+                {% if mapping.notes %}
+                <br><small><em>{{ mapping.notes }}</em></small>
+                {% endif %}
+            </td>
+            <td>{{ mapping.get_mapping_type_display }}</td>
+            <td>{{ mapping.section_reference|default:"-" }}</td>
+            <td>{{ mapping.document.get_status_display }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p><em>To wymaganie nie jest jeszcze powiązane z żadnymi dokumentami.</em></p>
+<p>
+    <a href="{% url 'documents:list' %}">Przejdź do listy dokumentów</a>, aby dodać powiązania.
+</p>
+{% endif %}
+
+{% endblock %}

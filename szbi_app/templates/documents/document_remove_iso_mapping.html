@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Usuń powiązanie ISO - SZBI{% endblock %}
+
+{% block content %}
+<h2>Usuń powiązanie z wymaganiem ISO</h2>
+
+<div>
+    <p><strong>Czy na pewno chcesz usunąć to powiązanie?</strong></p>
+    
+    <table>
+        <tr>
+            <td><strong>Dokument:</strong></td>
+            <td>{{ document.title }}</td>
+        </tr>
+        <tr>
+            <td><strong>Wymaganie ISO:</strong></td>
+            <td>{{ mapping.iso_requirement.iso_id }} - {{ mapping.iso_requirement.name }}</td>
+        </tr>
+        <tr>
+            <td><strong>Typ powiązania:</strong></td>
+            <td>{{ mapping.get_mapping_type_display }}</td>
+        </tr>
+    </table>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Tak, usuń powiązanie</button>
+    <a href="{% url 'documents:detail' document.pk %}">Anuluj</a>
+</form>
+
+{% endblock %}

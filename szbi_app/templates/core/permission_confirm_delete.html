@@ -8,7 +8,7 @@
 <p>Czy na pewno chcesz usunąć uprawnienie <strong>{{ permission.name }}</strong>?</p>
 
 {% if permission.groups.exists %}
-<div style="border: 1px solid red; padding: 10px; margin: 10px 0;">
+<div>
     <strong>Uwaga!</strong> To uprawnienie jest używane w {{ permission.groups.count }} grupach uprawnień.
     Zostanie usunięte z tych grup.
 </div>

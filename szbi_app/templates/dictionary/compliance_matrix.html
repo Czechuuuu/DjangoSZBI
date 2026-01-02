@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Macierz zgodności - SZBI{% endblock %}
+
+{% block content %}
+<h2>Macierz zgodności ISO 27001</h2>
+
+<p>
+    <a href="{% url 'dictionary:iso_requirement_list' %}">← Powrót do listy wymagań ISO</a>
+</p>
+
+<!-- Statystyki pokrycia -->
+<div>
+    <h4>Statystyki pokrycia</h4>
+    <p>
+        <strong>Wymagania ISO:</strong> {{ stats.total_requirements }} |
+        <strong>Pokryte:</strong> {{ stats.covered_requirements }} ({{ stats.coverage_percent }}%) |
+        <strong>Niepokryte:</strong> {{ stats.uncovered_requirements }} |
+        <strong>Dokumenty (opublikowane):</strong> {{ stats.total_documents }} |
+        <strong>Łączna liczba powiązań:</strong> {{ stats.total_mappings }}
+    </p>
+</div>
+
+<!-- Legenda -->
+<p>
+    <strong>Legenda:</strong>
+    ● Realizuje głównie |
+    ● Wspiera realizację |
+    ● Powiązany |
+    ○ Brak powiązania
+</p>
+
+{% if matrix_data and documents %}
+<!-- Macierz -->
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+        <tr>
+            <th>ID ISO</th>
+            <th>Nazwa wymagania</th>
+            {% for doc in documents %}
+            <th>
+                <a href="{% url 'documents:detail' doc.pk %}" title="{{ doc.title }}">
+                    {{ doc.title|truncatechars:20 }}
+                </a>
+            </th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in matrix_data %}
+        <tr>
+            <td>
+                <a href="{% url 'dictionary:iso_requirement_detail' row.requirement.pk %}">{{ row.requirement.iso_id }}</a>
+            </td>
+            <td title="{{ row.requirement.name }}">
+                {{ row.requirement.name|truncatechars:40 }}
+            </td>
+            {% for doc_info in row.documents %}
+            <td>
+                {% if doc_info.mapping_type == 'primary' %}
+                    ●
+                {% elif doc_info.mapping_type == 'supports' %}
+                    ●
+                {% elif doc_info.mapping_type == 'related' %}
+                    ●
+                {% else %}
+                    ○
+                {% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    {% if not matrix_data %}
+    <p><em>Brak wymagań ISO w systemie. <a href="{% url 'dictionary:iso_requirement_create' %}">Dodaj wymagania</a>.</em></p>
+    {% endif %}
+    {% if not documents %}
+    <p><em>Brak opublikowanych dokumentów w systemie. <a href="{% url 'documents:list' %}">Przejdź do dokumentów</a>.</em></p>
+    {% endif %}
+{% endif %}
+
+{% endblock %}

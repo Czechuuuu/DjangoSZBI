@@ -23,13 +23,10 @@ urlpatterns = [
     path('stanowisko/<int:pk>/usun/', views.position_delete, name='position_delete'),
     path('stanowisko/<int:pk>/uprawnienia/', views.position_permissions, name='position_permissions'),
     
-    # Uprawnienia
+    # Uprawnienia (tylko przeglądanie - uprawnienia są predefiniowane)
     path('uprawnienia/', views.permission_list, name='permission_list'),
-    path('uprawnienia/dodaj/', views.permission_create, name='permission_create'),
-    path('uprawnienia/<int:pk>/edytuj/', views.permission_update, name='permission_update'),
-    path('uprawnienia/<int:pk>/usun/', views.permission_delete, name='permission_delete'),
     
-    # Grupy uprawnień
+    # Grupy uprawnień (można tworzyć grupy i przypisywać do nich uprawnienia)
     path('uprawnienia/grupy/dodaj/', views.permission_group_create, name='permission_group_create'),
     path('uprawnienia/grupy/<int:pk>/edytuj/', views.permission_group_update, name='permission_group_update'),
     path('uprawnienia/grupy/<int:pk>/usun/', views.permission_group_delete, name='permission_group_delete'),
