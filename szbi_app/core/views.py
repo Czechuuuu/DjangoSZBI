@@ -4,9 +4,73 @@ from django.contrib import messages
 from django.urls import reverse
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.db import models as db_models
 
-from .models import Organization, Department, Position, Permission, PermissionGroup, PositionPermission, DepartmentPermission, Employee, ActivityLog
+from .models import Organization, Department, Position, Permission, PermissionGroup, PositionPermission, DepartmentPermission, Employee, ActivityLog, EmployeePermissionGroup
 from .forms import OrganizationForm, DepartmentForm, PositionForm, PermissionForm, PermissionGroupForm, EmployeeForm
+
+
+def get_related_objects(obj):
+    """
+    Zbiera wszystkie powiązane obiekty, które blokują lub zostaną skasowane kaskadowo.
+    Zwraca dict: {'protected': [...], 'cascade': [...], 'set_null': [...]}
+    """
+    result = {'protected': [], 'cascade': [], 'set_null': []}
+    
+    for related in obj._meta.get_fields():
+        # Relacje odwrotne (ForeignKey, OneToOne) - tylko odwrotne, nie forward
+        if related.one_to_many or related.one_to_one:
+            if not hasattr(related, 'related_model'):
+                continue
+            # Pomijamy forward relations (np. Employee.user)
+            if not hasattr(related, 'get_accessor_name'):
+                continue
+            accessor = related.get_accessor_name()
+            try:
+                manager = getattr(obj, accessor)
+                if hasattr(manager, 'count'):
+                    count = manager.count()
+                else:
+                    count = 1 if manager is not None else 0
+            except Exception:
+                continue
+            
+            if count == 0:
+                continue
+            
+            on_delete = getattr(related, 'on_delete', None)
+            model_name = related.related_model._meta.verbose_name_plural
+            
+            entry = {'model': model_name, 'count': count, 'accessor': accessor}
+            
+            if on_delete == db_models.PROTECT:
+                result['protected'].append(entry)
+            elif on_delete == db_models.CASCADE:
+                result['cascade'].append(entry)
+            elif on_delete == db_models.SET_NULL:
+                result['set_null'].append(entry)
+        
+        # Relacje M2M - tylko odwrotne
+        elif related.many_to_many:
+            if not hasattr(related, 'get_accessor_name'):
+                continue
+            accessor = related.get_accessor_name()
+            try:
+                manager = getattr(obj, accessor)
+                count = manager.count()
+            except Exception:
+                continue
+            
+            if count > 0:
+                model_name = related.related_model._meta.verbose_name_plural
+                result['cascade'].append({'model': model_name, 'count': count, 'accessor': accessor, 'm2m': True})
+    
+    return result
+
+
+def has_blocking_relations(related_info):
+    """Sprawdza czy są relacje PROTECT blokujące usunięcie"""
+    return len(related_info['protected']) > 0
 
 
 def is_admin(user):
@@ -131,28 +195,35 @@ def department_delete(request, pk):
     """Usuwanie działu"""
     department = get_object_or_404(Department, pk=pk)
     organization = department.organization
+    related = get_related_objects(department)
+    blocked = has_blocking_relations(related)
     
-    if request.method == 'POST':
+    if request.method == 'POST' and not blocked:
         name = department.name
         dept_id = department.pk
-        department.delete()
-        # Logujemy po usunięciu z zachowanymi danymi
-        ActivityLog.log(
-            user=request.user,
-            action='delete',
-            category='department',
-            object_type='Department',
-            object_id=dept_id,
-            object_repr=name,
-            description=f'Usunięto dział "{name}"',
-            request=request
-        )
-        messages.success(request, f'Dział "{name}" został usunięty.')
-        return redirect('core:organization_structure')
+        try:
+            department.delete()
+            ActivityLog.log(
+                user=request.user,
+                action='delete',
+                category='department',
+                object_type='Department',
+                object_id=dept_id,
+                object_repr=name,
+                description=f'Usunięto dział "{name}"',
+                request=request
+            )
+            messages.success(request, f'Dział "{name}" został usunięty.')
+            return redirect('core:organization_structure')
+        except Exception as e:
+            messages.error(request, f'Nie można usunąć działu: {e}')
+            return redirect('core:organization_structure')
     
     return render(request, 'core/department_confirm_delete.html', {
         'department': department,
-        'organization': organization
+        'organization': organization,
+        'related': related,
+        'blocked': blocked,
     })
 
 
@@ -219,27 +290,39 @@ def position_delete(request, pk):
     """Usuwanie stanowiska"""
     position = get_object_or_404(Position, pk=pk)
     organization = position.organization
+    related = get_related_objects(position)
+    blocked = has_blocking_relations(related)
     
-    if request.method == 'POST':
+    # Sprawdź pracowników z M2M
+    employee_count = position.employees.count()
+    
+    if request.method == 'POST' and not blocked:
         name = position.name
         pos_id = position.pk
-        position.delete()
-        ActivityLog.log(
-            user=request.user,
-            action='delete',
-            category='position',
-            object_type='Position',
-            object_id=pos_id,
-            object_repr=name,
-            description=f'Usunięto stanowisko "{name}"',
-            request=request
-        )
-        messages.success(request, f'Stanowisko "{name}" zostało usunięte.')
-        return redirect('core:organization_structure')
+        try:
+            position.delete()
+            ActivityLog.log(
+                user=request.user,
+                action='delete',
+                category='position',
+                object_type='Position',
+                object_id=pos_id,
+                object_repr=name,
+                description=f'Usunięto stanowisko "{name}"',
+                request=request
+            )
+            messages.success(request, f'Stanowisko "{name}" zostało usunięte.')
+            return redirect('core:organization_structure')
+        except Exception as e:
+            messages.error(request, f'Nie można usunąć stanowiska: {e}')
+            return redirect('core:organization_structure')
     
     return render(request, 'core/position_confirm_delete.html', {
         'position': position,
-        'organization': organization
+        'organization': organization,
+        'related': related,
+        'blocked': blocked,
+        'employee_count': employee_count,
     })
 
 
@@ -321,26 +404,34 @@ def permission_update(request, pk):
 def permission_delete(request, pk):
     """Usuwanie uprawnienia"""
     permission = get_object_or_404(Permission, pk=pk)
+    related = get_related_objects(permission)
+    blocked = has_blocking_relations(related)
     
-    if request.method == 'POST':
+    if request.method == 'POST' and not blocked:
         name = permission.name
         perm_id = permission.pk
-        permission.delete()
-        ActivityLog.log(
-            user=request.user,
-            action='delete',
-            category='permission',
-            object_type='Permission',
-            object_id=perm_id,
-            object_repr=name,
-            description=f'Usunięto uprawnienie "{name}"',
-            request=request
-        )
-        messages.success(request, f'Uprawnienie "{name}" zostało usunięte.')
-        return redirect('core:permission_list')
+        try:
+            permission.delete()
+            ActivityLog.log(
+                user=request.user,
+                action='delete',
+                category='permission',
+                object_type='Permission',
+                object_id=perm_id,
+                object_repr=name,
+                description=f'Usunięto uprawnienie "{name}"',
+                request=request
+            )
+            messages.success(request, f'Uprawnienie "{name}" zostało usunięte.')
+            return redirect('core:permission_list')
+        except Exception as e:
+            messages.error(request, f'Nie można usunąć uprawnienia: {e}')
+            return redirect('core:permission_list')
     
     return render(request, 'core/permission_confirm_delete.html', {
-        'permission': permission
+        'permission': permission,
+        'related': related,
+        'blocked': blocked,
     })
 
 
@@ -396,26 +487,34 @@ def permission_group_update(request, pk):
 def permission_group_delete(request, pk):
     """Usuwanie grupy uprawnień"""
     group = get_object_or_404(PermissionGroup, pk=pk)
+    related = get_related_objects(group)
+    blocked = has_blocking_relations(related)
     
-    if request.method == 'POST':
+    if request.method == 'POST' and not blocked:
         name = group.name
         group_id = group.pk
-        group.delete()
-        ActivityLog.log(
-            user=request.user,
-            action='delete',
-            category='permission',
-            object_type='PermissionGroup',
-            object_id=group_id,
-            object_repr=name,
-            description=f'Usunięto grupę uprawnień "{name}"',
-            request=request
-        )
-        messages.success(request, f'Grupa uprawnień "{name}" została usunięta.')
-        return redirect('core:permission_list')
+        try:
+            group.delete()
+            ActivityLog.log(
+                user=request.user,
+                action='delete',
+                category='permission',
+                object_type='PermissionGroup',
+                object_id=group_id,
+                object_repr=name,
+                description=f'Usunięto grupę uprawnień "{name}"',
+                request=request
+            )
+            messages.success(request, f'Grupa uprawnień "{name}" została usunięta.')
+            return redirect('core:permission_list')
+        except Exception as e:
+            messages.error(request, f'Nie można usunąć grupy uprawnień: {e}')
+            return redirect('core:permission_list')
     
     return render(request, 'core/permission_group_confirm_delete.html', {
-        'group': group
+        'group': group,
+        'related': related,
+        'blocked': blocked,
     })
 
 
@@ -553,28 +652,47 @@ def employee_update(request, pk):
 def employee_delete(request, pk):
     """Usuwanie pracownika"""
     employee = get_object_or_404(Employee, pk=pk)
+    related = get_related_objects(employee)
+    # Sprawdź też powiązania user (PROTECT na DocumentLog, DocumentVersion itp.)
+    user_related = get_related_objects(employee.user)
+    blocked = has_blocking_relations(related) or has_blocking_relations(user_related)
     
-    if request.method == 'POST':
+    # Połącz informacje o powiązaniach
+    all_protected = related['protected'] + user_related['protected']
+    all_cascade = related['cascade'] + user_related['cascade']
+    combined_related = {
+        'protected': all_protected,
+        'cascade': all_cascade,
+        'set_null': related['set_null'] + user_related['set_null'],
+    }
+    
+    if request.method == 'POST' and not blocked:
         user = employee.user
         name = employee.get_full_name()
         emp_id = employee.pk
-        employee.delete()
-        user.delete()  # Usuń też konto użytkownika
-        ActivityLog.log(
-            user=request.user,
-            action='delete',
-            category='employee',
-            object_type='Employee',
-            object_id=emp_id,
-            object_repr=name,
-            description=f'Usunięto pracownika "{name}"',
-            request=request
-        )
-        messages.success(request, f'Pracownik "{name}" został usunięty.')
-        return redirect('core:employee_list')
+        try:
+            employee.delete()
+            user.delete()
+            ActivityLog.log(
+                user=request.user,
+                action='delete',
+                category='employee',
+                object_type='Employee',
+                object_id=emp_id,
+                object_repr=name,
+                description=f'Usunięto pracownika "{name}"',
+                request=request
+            )
+            messages.success(request, f'Pracownik "{name}" został usunięty.')
+            return redirect('core:employee_list')
+        except Exception as e:
+            messages.error(request, f'Nie można usunąć pracownika: {e}')
+            return redirect('core:employee_list')
     
     return render(request, 'core/employee_confirm_delete.html', {
         'employee': employee,
+        'related': combined_related,
+        'blocked': blocked,
     })
 
 

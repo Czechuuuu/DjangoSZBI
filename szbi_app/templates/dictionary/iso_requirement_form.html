@@ -5,45 +5,44 @@
 {% block content %}
 <h2>{{ title }}</h2>
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     
     <table>
         <tr>
-            <td><label for="id_iso_id"><strong>ID zabezpieczenia: *</strong></label></td>
+            <td><label for="id_objective"><strong>Cel wymagań:</strong></label></td>
+            <td>
+                {{ form.objective }}
+                {% if form.objective.errors %}
+                    <br><span style="color:red;">{{ form.objective.errors.0 }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_iso_id"><strong>ID wymagania: *</strong></label></td>
             <td>
                 {{ form.iso_id }}
                 {% if form.iso_id.errors %}
-                    <br><span>{{ form.iso_id.errors.0 }}</span>
+                    <br><span style="color:red;">{{ form.iso_id.errors.0 }}</span>
                 {% endif %}
                 <br><small>{{ form.iso_id.help_text }}</small>
             </td>
         </tr>
         <tr>
-            <td><label for="id_name"><strong>Nazwa zabezpieczenia: *</strong></label></td>
+            <td><label for="id_name"><strong>Nazwa wymagania: *</strong></label></td>
             <td>
                 {{ form.name }}
                 {% if form.name.errors %}
-                    <br><span>{{ form.name.errors.0 }}</span>
+                    <br><span style="color:red;">{{ form.name.errors.0 }}</span>
                 {% endif %}
             </td>
         </tr>
         <tr>
-            <td><label for="id_category"><strong>Kategoria:</strong></label></td>
-            <td>
-                {{ form.category }}
-                {% if form.category.errors %}
-                    <br><span>{{ form.category.errors.0 }}</span>
-                {% endif %}
-                <br><small>{{ form.category.help_text }}</small>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="id_description"><strong>Opis zabezpieczenia:</strong></label></td>
+            <td><label for="id_description"><strong>Opis wymagania:</strong></label></td>
             <td>
                 {{ form.description }}
                 {% if form.description.errors %}
-                    <br><span>{{ form.description.errors.0 }}</span>
+                    <br><span style="color:red;">{{ form.description.errors.0 }}</span>
                 {% endif %}
             </td>
         </tr>
@@ -52,16 +51,16 @@
             <td>
                 {{ form.is_applied }}
                 {% if form.is_applied.errors %}
-                    <br><span>{{ form.is_applied.errors.0 }}</span>
+                    <br><span style="color:red;">{{ form.is_applied.errors.0 }}</span>
                 {% endif %}
             </td>
         </tr>
         <tr>
-            <td><label for="id_implementation_method"><strong>Sposób realizacji / Dokument referencyjny:</strong></label></td>
+            <td><label for="id_implementation_method"><strong>Sposób realizacji:</strong></label></td>
             <td>
                 {{ form.implementation_method }}
                 {% if form.implementation_method.errors %}
-                    <br><span>{{ form.implementation_method.errors.0 }}</span>
+                    <br><span style="color:red;">{{ form.implementation_method.errors.0 }}</span>
                 {% endif %}
                 <br><small>{{ form.implementation_method.help_text }}</small>
             </td>
@@ -71,15 +70,40 @@
             <td>
                 {{ form.notes }}
                 {% if form.notes.errors %}
-                    <br><span>{{ form.notes.errors.0 }}</span>
+                    <br><span style="color:red;">{{ form.notes.errors.0 }}</span>
                 {% endif %}
             </td>
         </tr>
     </table>
     
+    {% if not is_edit and attachment_form %}
+    <hr>
+    <h3>📎 Załącznik (opcjonalnie)</h3>
+    <table>
+        <tr>
+            <td><label for="id_title"><strong>Tytuł pliku:</strong></label></td>
+            <td>
+                {{ attachment_form.title }}
+                {% if attachment_form.title.errors %}
+                    <br><span style="color:red;">{{ attachment_form.title.errors.0 }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_file"><strong>Plik:</strong></label></td>
+            <td>
+                {{ attachment_form.file }}
+                {% if attachment_form.file.errors %}
+                    <br><span style="color:red;">{{ attachment_form.file.errors.0 }}</span>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+    {% endif %}
+    
     <p>
         <button type="submit">{% if is_edit %}Zapisz zmiany{% else %}Dodaj wymaganie{% endif %}</button>
-        <a href="{% url 'dictionary:iso_requirement_list' %}">Anuluj</a>
+        <a href="{% url 'dictionary:iso_tree' %}">Anuluj</a>
     </p>
 </form>
 

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Cofnij dostęp - SZBI{% endblock %}
+
+{% block content %}
+<h2>Cofnij dostęp do dokumentu</h2>
+
+<div>
+    <p><strong>Czy na pewno chcesz cofnąć dostęp tej grupie?</strong></p>
+    
+    <table border="1" cellpadding="10" cellspacing="0">
+        <tr>
+            <td><strong>Dokument:</strong></td>
+            <td>[{{ document.designation }}] {{ document.title }}</td>
+        </tr>
+        <tr>
+            <td><strong>Grupa uprawnień:</strong></td>
+            <td>{{ access.permission_group.name }}</td>
+        </tr>
+        <tr>
+            <td><strong>Poziom dostępu:</strong></td>
+            <td>{{ access.get_access_level_display }}</td>
+        </tr>
+    </table>
+</div>
+
+<br>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Tak, cofnij dostęp</button>
+    <a href="{% url 'documents:detail' document.pk %}">Anuluj</a>
+</form>
+
+{% endblock %}

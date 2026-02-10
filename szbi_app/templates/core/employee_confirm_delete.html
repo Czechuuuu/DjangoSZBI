@@ -3,7 +3,7 @@
 {% block title %}Usuń pracownika - SZBI{% endblock %}
 
 {% block content %}
-<h1>Usunięcie pracownika</h1>
+<h2>Usunięcie pracownika</h2>
 
 <p>Czy na pewno chcesz usunąć pracownika:</p>
 
@@ -12,14 +12,25 @@
 <ul>
     <li>Login: {{ employee.user.username }}</li>
     {% if employee.department %}<li>Dział: {{ employee.department.name }}</li>{% endif %}
-    {% if employee.position %}<li>Stanowisko: {{ employee.position.name }}</li>{% endif %}
+    {% for pos in employee.positions.all %}
+        <li>Stanowisko: {{ pos.name }}</li>
+    {% endfor %}
 </ul>
 
 <p><strong>Uwaga:</strong> Ta operacja usunie również konto użytkownika w systemie!</p>
 
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">Tak, usuń</button>
-    <a href="{% url 'core:employee_list' %}">Anuluj</a>
-</form>
+{% include "core/_related_objects_warning.html" %}
+
+{% if blocked %}
+    <p><a href="{% url 'core:employee_list' %}">← Powrót do listy pracowników</a></p>
+{% else %}
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" style="background: #dc3545; color: white; padding: 8px 16px; border: none; cursor: pointer;">Tak, usuń</button>
+        <a href="{% url 'core:employee_list' %}" style="margin-left: 10px;">Anuluj</a>
+    </form>
+{% endif %}
+
+<hr>
+<p><a href="{% url 'core:employee_list' %}">← Powrót do listy pracowników</a></p>
 {% endblock %}

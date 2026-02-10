@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Dodaj wersję - {{ document.designation }} - SZBI{% endblock %}
+
+{% block content %}
+<h2>Dodaj nową wersję dokumentu</h2>
+
+<p>Dokument: <strong>[{{ document.designation }}] {{ document.title }}</strong></p>
+
+<div style="margin-bottom: 10px;">
+    <a href="{% url 'documents:detail' document.pk %}">← Powrót do dokumentu</a>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <table>
+        <tr>
+            <td><label for="id_version_number"><strong>Numer wersji: *</strong></label></td>
+            <td>
+                {{ form.version_number }}
+                {% if form.version_number.errors %}
+                    <br><span style="color: red;">{{ form.version_number.errors.0 }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_file"><strong>Plik: *</strong></label></td>
+            <td>
+                {{ form.file }}
+                {% if form.file.errors %}
+                    <br><span style="color: red;">{{ form.file.errors.0 }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_change_description"><strong>Opis zmian:</strong></label></td>
+            <td>
+                {{ form.change_description }}
+                {% if form.change_description.errors %}
+                    <br><span style="color: red;">{{ form.change_description.errors.0 }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_mark_as_current"><strong>Wersja obowiązująca:</strong></label></td>
+            <td>
+                {{ form.mark_as_current }}
+                <label for="id_mark_as_current">Oznacz tę wersję jako obowiązującą</label>
+                <br><small>Jeśli zaznaczysz, poprzednia wersja obowiązująca zostanie zastąpiona.</small>
+            </td>
+        </tr>
+    </table>
+    
+    <br>
+    <button type="submit">Dodaj wersję</button>
+    <a href="{% url 'documents:detail' document.pk %}">Anuluj</a>
+</form>
+
+{% endblock %}

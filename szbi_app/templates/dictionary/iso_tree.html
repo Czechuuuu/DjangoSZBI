@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Słownik ISO 27001 - SZBI{% endblock %}
+
+{% block content %}
+<h2>Słownik ISO 27001 — Tablica A.1</h2>
+
+<p>
+    <a href="{% url 'dictionary:domain_create' %}">+ Dodaj domenę</a>
+    <a href="{% url 'dictionary:objective_create' %}">+ Dodaj cel wymagań</a>
+    | <a href="{% url 'dictionary:iso_requirement_create' %}">+ Dodaj wymaganie</a>
+    | <a href="{% url 'dictionary:iso_requirement_list' %}">📋 Lista wymagań</a>
+</p>
+
+<!-- Statystyki -->
+<table border="1" cellpadding="8" cellspacing="0" style="margin-bottom: 20px;">
+    <tr>
+        <th>Domeny</th>
+        <th>Cele</th>
+        <th>Wymagania</th>
+        <th>✓ Stosujemy</th>
+        <th>◐ Częściowo</th>
+        <th>✗ Nie</th>
+        <th>N/D</th>
+    </tr>
+    <tr style="text-align: center;">
+        <td>{{ stats.domains }}</td>
+        <td>{{ stats.objectives }}</td>
+        <td><strong>{{ stats.total }}</strong></td>
+        <td style="color: green;">{{ stats.applied }}</td>
+        <td style="color: orange;">{{ stats.partial }}</td>
+        <td style="color: red;">{{ stats.not_applied }}</td>
+        <td style="color: gray;">{{ stats.not_applicable }}</td>
+    </tr>
+</table>
+
+<hr>
+
+<!-- Drzewo ISO -->
+{% for domain in domains %}
+<div style="border: 1px solid #333; margin-bottom: 15px; padding: 0;">
+    <!-- Nagłówek domeny -->
+    <div style="background: #2c3e50; color: white; padding: 10px 15px;">
+        <strong>{{ domain.code }}</strong> &nbsp; {{ domain.name }}
+        <span style="float: right;">
+            <a href="{% url 'dictionary:objective_create_for_domain' domain.pk %}" style="color: #aed6f1;">+ cel</a>
+            | <a href="{% url 'dictionary:domain_update' domain.pk %}" style="color: #f9e79f;">edytuj</a>
+            | <a href="{% url 'dictionary:domain_delete' domain.pk %}" style="color: #f5b7b1;">usuń</a>
+        </span>
+    </div>
+    
+    {% for objective in domain.objectives.all %}
+    <div style="border-top: 1px solid #bbb; padding: 0;">
+        <!-- Nagłówek celu -->
+        <div style="background: #d5dbdb; padding: 8px 15px;">
+            <strong>{{ objective.code }}</strong> &nbsp; {{ objective.name }}
+            <span style="float: right;">
+                <a href="{% url 'dictionary:iso_requirement_create_for_objective' objective.pk %}">+ wymaganie</a>
+                | <a href="{% url 'dictionary:objective_update' objective.pk %}">edytuj</a>
+                | <a href="{% url 'dictionary:objective_delete' objective.pk %}">usuń</a>
+            </span>
+        </div>
+        
+        {% if objective.objective_text %}
+        <div style="background: #eaf2f8; padding: 8px 15px; font-style: italic; font-size: 0.9em;">
+            <strong>Cel:</strong> {{ objective.objective_text }}
+        </div>
+        {% endif %}
+        
+        <!-- Wymagania w ramach celu -->
+        {% for req in objective.requirements.all %}
+        <div style="border-top: 1px solid #ddd; padding: 8px 15px 8px 30px;">
+            <table style="width: 100%;" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td style="width: 80px; vertical-align: top;">
+                        <strong>{{ req.iso_id }}</strong>
+                    </td>
+                    <td style="vertical-align: top;">
+                        <a href="{% url 'dictionary:iso_requirement_detail' req.pk %}">{{ req.name }}</a>
+                        {% if req.description %}
+                        <div style="font-size: 0.85em; color: #555; margin-top: 4px;">
+                            <strong>Wymaganie:</strong> {{ req.description|truncatewords:40 }}
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td style="width: 100px; text-align: center; vertical-align: top;">
+                        {% if req.is_applied == 'yes' %}
+                            <span style="color: green;">✓ Tak</span>
+                        {% elif req.is_applied == 'partial' %}
+                            <span style="color: orange;">◐ Częściowo</span>
+                        {% elif req.is_applied == 'no' %}
+                            <span style="color: red;">✗ Nie</span>
+                        {% else %}
+                            <span style="color: gray;">N/D</span>
+                        {% endif %}
+                    </td>
+                    <td style="width: 120px; text-align: right; vertical-align: top;">
+                        <a href="{% url 'dictionary:iso_requirement_detail' req.pk %}">szczegóły</a>
+                        | <a href="{% url 'dictionary:iso_requirement_update' req.pk %}">edytuj</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        {% empty %}
+        <div style="padding: 8px 15px 8px 30px; color: #888; font-style: italic;">
+            Brak wymagań w tym celu.
+        </div>
+        {% endfor %}
+    </div>
+    {% empty %}
+    <div style="padding: 10px 15px; color: #888; font-style: italic;">
+        Brak celów w tej domenie.
+    </div>
+    {% endfor %}
+</div>
+{% empty %}
+<p><em>Brak domen ISO w systemie. Dodaj pierwszą domenę używając przycisku powyżej.</em></p>
+{% endfor %}
+
+{% if orphan_requirements %}
+<hr>
+<h3>Wymagania bez przypisanego celu</h3>
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nazwa</th>
+            <th>Status</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for req in orphan_requirements %}
+        <tr>
+            <td><strong>{{ req.iso_id }}</strong></td>
+            <td>{{ req.name }}</td>
+            <td>{{ req.get_is_applied_display }}</td>
+            <td>
+                <a href="{% url 'dictionary:iso_requirement_update' req.pk %}">Edytuj (przypisz cel)</a>
+                | <a href="{% url 'dictionary:iso_requirement_delete' req.pk %}">Usuń</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% endblock %}

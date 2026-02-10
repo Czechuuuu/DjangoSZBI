@@ -3,22 +3,22 @@
 {% block title %}Wymagania ISO - SZBI{% endblock %}
 
 {% block content %}
-<h2>Wymagania ISO 27001</h2>
+<h2>Lista wymagań ISO 27001</h2>
 
 <!-- Przyciski akcji -->
 <p>
-    <a href="{% url 'dictionary:iso_requirement_create' %}">+ Dodaj wymaganie ISO</a>
-    | <a href="{% url 'dictionary:compliance_matrix' %}">Macierz zgodności</a>
+    <a href="{% url 'dictionary:iso_tree' %}">← Drzewo ISO</a>
+    | <a href="{% url 'dictionary:iso_requirement_create' %}">+ Dodaj wymaganie</a>
 </p>
 
 <!-- Statystyki -->
 <p>
     <strong>Statystyki:</strong>
     Razem: <strong>{{ stats.total }}</strong> |
-    Stosujemy: <strong>{{ stats.applied }}</strong> |
-    Nie stosujemy: <strong>{{ stats.not_applied }}</strong> |
-    Częściowo: <strong>{{ stats.partial }}</strong> |
-    Nie dotyczy: <strong>{{ stats.not_applicable }}</strong>
+    Stosujemy: <strong style="color:green;">{{ stats.applied }}</strong> |
+    Nie stosujemy: <strong style="color:red;">{{ stats.not_applied }}</strong> |
+    Częściowo: <strong style="color:orange;">{{ stats.partial }}</strong> |
+    Nie dotyczy: <strong style="color:gray;">{{ stats.not_applicable }}</strong>
 </p>
 
 <!-- Filtry -->
@@ -34,11 +34,11 @@
         {% endfor %}
     </select>
     
-    <label for="category">Kategoria:</label>
-    <select id="category" name="category">
+    <label for="domain">Domena:</label>
+    <select id="domain" name="domain">
         <option value="">-- Wszystkie --</option>
-        {% for cat in categories %}
-        <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>{{ cat }}</option>
+        {% for d in domains %}
+        <option value="{{ d.pk }}" {% if domain_filter == d.pk|stringformat:"d" %}selected{% endif %}>{{ d }}</option>
         {% endfor %}
     </select>
     
@@ -50,13 +50,14 @@
 
 <!-- Tabela wymagań -->
 {% if requirements %}
-<table border="1" cellpadding="10" cellspacing="0">
+<table border="1" cellpadding="8" cellspacing="0">
     <thead>
         <tr>
             <th>ID</th>
-            <th>Nazwa zabezpieczenia</th>
+            <th>Nazwa wymagania</th>
+            <th>Domena / Cel</th>
             <th>Czy stosujemy?</th>
-            <th>Sposób realizacji / Dokument referencyjny</th>
+            <th>Sposób realizacji</th>
             <th>Akcje</th>
         </tr>
     </thead>
@@ -66,26 +67,30 @@
             <td><strong>{{ req.iso_id }}</strong></td>
             <td>
                 <a href="{% url 'dictionary:iso_requirement_detail' req.pk %}">{{ req.name }}</a>
-                {% if req.category %}
-                <br><small>{{ req.category }}</small>
+            </td>
+            <td>
+                {% if req.objective %}
+                    <small>{{ req.objective.domain.code }} → {{ req.objective.code }}</small>
+                {% else %}
+                    <em style="color:#999;">—</em>
                 {% endif %}
             </td>
             <td>
                 {% if req.is_applied == 'yes' %}
-                    ✓ Tak
+                    <span style="color:green;">✓ Tak</span>
                 {% elif req.is_applied == 'no' %}
-                    ✗ Nie
+                    <span style="color:red;">✗ Nie</span>
                 {% elif req.is_applied == 'partial' %}
-                    ◐ Częściowo
+                    <span style="color:orange;">◐ Częściowo</span>
                 {% else %}
-                    N/D
+                    <span style="color:gray;">N/D</span>
                 {% endif %}
             </td>
             <td>
                 {% if req.implementation_method %}
-                    {{ req.implementation_method|truncatewords:30 }}
+                    {{ req.implementation_method|truncatewords:20 }}
                 {% else %}
-                    <em>Brak</em>
+                    <em style="color:#999;">—</em>
                 {% endif %}
             </td>
             <td>
@@ -102,21 +107,21 @@
 {% if requirements.has_other_pages %}
 <p>
     {% if requirements.has_previous %}
-        <a href="?page=1{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}">« Pierwsza</a>
-        <a href="?page={{ requirements.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}">‹ Poprzednia</a>
+        <a href="?page=1{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if domain_filter %}&domain={{ domain_filter }}{% endif %}">« Pierwsza</a>
+        <a href="?page={{ requirements.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if domain_filter %}&domain={{ domain_filter }}{% endif %}">‹ Poprzednia</a>
     {% endif %}
     
     Strona {{ requirements.number }} z {{ requirements.paginator.num_pages }}
     
     {% if requirements.has_next %}
-        <a href="?page={{ requirements.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}">Następna ›</a>
-        <a href="?page={{ requirements.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}">Ostatnia »</a>
+        <a href="?page={{ requirements.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if domain_filter %}&domain={{ domain_filter }}{% endif %}">Następna ›</a>
+        <a href="?page={{ requirements.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if domain_filter %}&domain={{ domain_filter }}{% endif %}">Ostatnia »</a>
     {% endif %}
 </p>
 {% endif %}
 
 {% else %}
-<p><em>Brak wymagań ISO w systemie. Dodaj pierwsze wymaganie używając przycisku powyżej.</em></p>
+<p><em>Brak wymagań spełniających kryteria. <a href="{% url 'dictionary:iso_requirement_create' %}">Dodaj pierwsze wymaganie</a>.</em></p>
 {% endif %}
 
 {% endblock %}

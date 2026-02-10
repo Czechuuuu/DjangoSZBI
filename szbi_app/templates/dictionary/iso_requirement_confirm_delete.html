@@ -5,35 +5,24 @@
 {% block content %}
 <h2>Usuń wymaganie ISO</h2>
 
-<div>
-    <p><strong>Czy na pewno chcesz usunąć to wymaganie ISO?</strong></p>
-    
-    <table>
-        <tr>
-            <td><strong>ID:</strong></td>
-            <td>{{ iso_req.iso_id }}</td>
-        </tr>
-        <tr>
-            <td><strong>Nazwa:</strong></td>
-            <td>{{ iso_req.name }}</td>
-        </tr>
-        {% if iso_req.category %}
-        <tr>
-            <td><strong>Kategoria:</strong></td>
-            <td>{{ iso_req.category }}</td>
-        </tr>
-        {% endif %}
-        <tr>
-            <td><strong>Status:</strong></td>
-            <td>{{ iso_req.get_is_applied_display }}</td>
-        </tr>
-    </table>
-</div>
+<p>Czy na pewno chcesz usunąć wymaganie <strong>{{ iso_req.iso_id }} — {{ iso_req.name }}</strong>?</p>
 
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">Tak, usuń wymaganie</button>
-    <a href="{% url 'dictionary:iso_requirement_list' %}">Anuluj</a>
-</form>
+{% if iso_req.objective %}
+<p>Cel: {{ iso_req.objective }}</p>
+{% endif %}
 
+{% include "core/_related_objects_warning.html" %}
+
+{% if blocked %}
+    <p><a href="{% url 'dictionary:iso_tree' %}">← Powrót do drzewa ISO</a></p>
+{% else %}
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" style="background: #dc3545; color: white; padding: 8px 16px; border: none; cursor: pointer;">Tak, usuń</button>
+        <a href="{% url 'dictionary:iso_requirement_detail' iso_req.pk %}" style="margin-left: 10px;">Anuluj</a>
+    </form>
+{% endif %}
+
+<hr>
+<p><a href="{% url 'dictionary:iso_tree' %}">← Powrót do drzewa ISO</a></p>
 {% endblock %}

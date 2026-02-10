@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - SZBI{% endblock %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+
+<p>Wymaganie: <strong>{{ iso_req.iso_id }} — {{ iso_req.name }}</strong></p>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <td><label for="id_title"><strong>Tytuł / opis pliku: *</strong></label></td>
+            <td>
+                {{ form.title }}
+                {% if form.title.errors %}<br><span style="color:red;">{{ form.title.errors.0 }}</span>{% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_file"><strong>Plik: *</strong></label></td>
+            <td>
+                {{ form.file }}
+                {% if form.file.errors %}<br><span style="color:red;">{{ form.file.errors.0 }}</span>{% endif %}
+            </td>
+        </tr>
+    </table>
+    <p>
+        <button type="submit">Dodaj plik</button>
+        <a href="{% url 'dictionary:iso_requirement_detail' iso_req.pk %}">Anuluj</a>
+    </p>
+</form>
+{% endblock %}

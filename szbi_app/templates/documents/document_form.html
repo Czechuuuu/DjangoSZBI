@@ -1,10 +1,31 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Nowy dokument</h2>
+<h2>{% if object %}Edytuj dokument: {{ object.designation }}{% else %}Nowy dokument{% endif %}</h2>
+
+<div style="margin-bottom: 10px;">
+    {% if object %}
+        <a href="{% url 'documents:detail' object.pk %}">← Powrót do dokumentu</a>
+    {% else %}
+        <a href="{% url 'documents:list' %}">← Powrót do listy</a>
+    {% endif %}
+</div>
+
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    <table>
+        {% for field in form %}
+        <tr>
+            <td><label for="{{ field.id_for_label }}"><strong>{{ field.label }}{% if field.field.required %} *{% endif %}</strong></label></td>
+            <td>
+                {{ field }}
+                {% if field.help_text %}<br><small>{{ field.help_text }}</small>{% endif %}
+                {% if field.errors %}<br><span style="color: red;">{{ field.errors.0 }}</span>{% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
     <button type="submit">Zapisz</button>
 </form>
 {% endblock %}

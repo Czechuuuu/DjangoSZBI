@@ -7,26 +7,17 @@
 
 <p>Czy na pewno chcesz usunąć grupę uprawnień <strong>{{ group.name }}</strong>?</p>
 
-{% if group.position_assignments.exists or group.department_assignments.exists %}
-<div>
-    <strong>Uwaga!</strong> Ta grupa uprawnień jest przypisana do:
-    <ul>
-        {% if group.position_assignments.exists %}
-        <li>{{ group.position_assignments.count }} stanowisk</li>
-        {% endif %}
-        {% if group.department_assignments.exists %}
-        <li>{{ group.department_assignments.count }} działów</li>
-        {% endif %}
-    </ul>
-    Wszystkie te przypisania zostaną usunięte!
-</div>
-{% endif %}
+{% include "core/_related_objects_warning.html" %}
 
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">Tak, usuń</button>
-    <a href="{% url 'core:permission_list' %}">Anuluj</a>
-</form>
+{% if blocked %}
+    <p><a href="{% url 'core:permission_list' %}">← Powrót do listy uprawnień</a></p>
+{% else %}
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" style="background: #dc3545; color: white; padding: 8px 16px; border: none; cursor: pointer;">Tak, usuń</button>
+        <a href="{% url 'core:permission_list' %}" style="margin-left: 10px;">Anuluj</a>
+    </form>
+{% endif %}
 
 <hr>
 <p><a href="{% url 'core:permission_list' %}">← Powrót do listy uprawnień</a></p>

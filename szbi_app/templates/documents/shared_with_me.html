@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Udostępnione dla mnie - SZBI{% endblock %}
+
+{% block content %}
+<h2>Udostępnione dla mnie</h2>
+
+<div style="margin-bottom: 10px;">
+    <a href="{% url 'documents:list' %}">← Powrót do listy dokumentów</a>
+</div>
+
+{% if access_list %}
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Oznaczenie</th>
+            <th>Tytuł</th>
+            <th>Rodzaj</th>
+            <th>Status</th>
+            <th>Przez grupę</th>
+            <th>Poziom dostępu</th>
+            <th>Właściciel</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for access in access_list %}
+        <tr>
+            <td><strong>{{ access.document.designation }}</strong></td>
+            <td>
+                <a href="{% url 'documents:detail' access.document.pk %}">
+                    {{ access.document.title }}
+                </a>
+            </td>
+            <td>{{ access.document.get_document_type_display }}</td>
+            <td>{{ access.document.get_status_display }}</td>
+            <td>{{ access.permission_group.name }}</td>
+            <td>{{ access.get_access_level_display }}</td>
+            <td>{{ access.document.owner.username }}</td>
+            <td>
+                <a href="{% url 'documents:detail' access.document.pk %}">Szczegóły</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p><em>Żaden dokument nie został Ci jeszcze udostępniony przez grupę uprawnień.</em></p>
+{% endif %}
+
+{% endblock %}

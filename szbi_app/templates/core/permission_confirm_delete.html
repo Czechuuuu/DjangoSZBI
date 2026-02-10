@@ -7,18 +7,17 @@
 
 <p>Czy na pewno chcesz usunąć uprawnienie <strong>{{ permission.name }}</strong>?</p>
 
-{% if permission.groups.exists %}
-<div>
-    <strong>Uwaga!</strong> To uprawnienie jest używane w {{ permission.groups.count }} grupach uprawnień.
-    Zostanie usunięte z tych grup.
-</div>
-{% endif %}
+{% include "core/_related_objects_warning.html" %}
 
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">Tak, usuń</button>
-    <a href="{% url 'core:permission_list' %}">Anuluj</a>
-</form>
+{% if blocked %}
+    <p><a href="{% url 'core:permission_list' %}">← Powrót do listy uprawnień</a></p>
+{% else %}
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" style="background: #dc3545; color: white; padding: 8px 16px; border: none; cursor: pointer;">Tak, usuń</button>
+        <a href="{% url 'core:permission_list' %}" style="margin-left: 10px;">Anuluj</a>
+    </form>
+{% endif %}
 
 <hr>
 <p><a href="{% url 'core:permission_list' %}">← Powrót do listy uprawnień</a></p>

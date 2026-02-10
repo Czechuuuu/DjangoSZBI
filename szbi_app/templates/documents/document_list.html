@@ -7,14 +7,51 @@
 
 <p>
     <a href="{% url 'documents:create' %}">+ Dodaj dokument</a>
+    | <a href="{% url 'documents:shared_with_me' %}">Udostępnione dla mnie</a>
 </p>
+
+<!-- Filtry -->
+<form method="get" style="margin-bottom: 15px;">
+    <table>
+        <tr>
+            <td>
+                <input type="text" name="q" value="{{ current_search }}" placeholder="Szukaj (oznaczenie, tytuł...)" style="width: 200px;">
+            </td>
+            <td>
+                <select name="status">
+                    <option value="">-- Status --</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <select name="type">
+                    <option value="">-- Rodzaj --</option>
+                    {% for value, label in type_choices %}
+                    <option value="{{ value }}" {% if current_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <button type="submit">Filtruj</button>
+                {% if current_search or current_status or current_type %}
+                <a href="{% url 'documents:list' %}">Wyczyść</a>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+</form>
 
 {% if object_list %}
 <table border="1" cellpadding="10" cellspacing="0">
     <thead>
         <tr>
+            <th>Oznaczenie</th>
             <th>Tytuł</th>
+            <th>Rodzaj</th>
             <th>Status</th>
+            <th>Wersja</th>
             <th>Wymagania ISO</th>
             <th>Właściciel</th>
             <th>Akcje</th>
@@ -23,18 +60,25 @@
     <tbody>
         {% for doc in object_list %}
         <tr>
+            <td><strong>{{ doc.designation }}</strong></td>
             <td>
                 <a href="{% url 'documents:detail' doc.pk %}"><strong>{{ doc.title }}</strong></a>
                 {% if doc.description %}
                 <br><small>{{ doc.description|truncatewords:15 }}</small>
                 {% endif %}
             </td>
+            <td>{{ doc.get_document_type_display }}</td>
+            <td>{{ doc.get_status_display }}</td>
             <td>
-                {{ doc.get_status_display }}
+                {% with current=doc.get_current_version %}
+                    {% if current %}
+                        v{{ current.version_number }}
+                    {% else %}
+                        <em>brak</em>
+                    {% endif %}
+                {% endwith %}
             </td>
-            <td>
-                {{ doc.get_iso_requirements_count }}
-            </td>
+            <td>{{ doc.get_iso_requirements_count }}</td>
             <td>{{ doc.owner.username }}</td>
             <td>
                 <a href="{% url 'documents:detail' doc.pk %}">Szczegóły</a> |
@@ -45,7 +89,7 @@
     </tbody>
 </table>
 {% else %}
-<p><em>Brak dokumentów w systemie.</em></p>
+<p><em>Brak dokumentów spełniających kryteria.</em></p>
 {% endif %}
 
 {% endblock %}

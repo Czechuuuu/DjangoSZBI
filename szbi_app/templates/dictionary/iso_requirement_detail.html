@@ -6,29 +6,39 @@
 <h2>Wymaganie ISO: {{ iso_req.iso_id }}</h2>
 
 <p>
-    <a href="{% url 'dictionary:iso_requirement_list' %}">← Powrót do listy</a>
+    <a href="{% url 'dictionary:iso_tree' %}">← Drzewo ISO</a>
+    | <a href="{% url 'dictionary:iso_requirement_list' %}">Lista wymagań</a>
     | <a href="{% url 'dictionary:iso_requirement_update' iso_req.pk %}">Edytuj</a>
     | <a href="{% url 'dictionary:iso_requirement_delete' iso_req.pk %}">Usuń</a>
 </p>
 
-<table border="1" cellpadding="15" cellspacing="0">
+<table border="1" cellpadding="12" cellspacing="0">
     <tr>
-        <th>ID zabezpieczenia</th>
+        <th>ID wymagania</th>
         <td><strong>{{ iso_req.iso_id }}</strong></td>
     </tr>
     <tr>
-        <th>Nazwa zabezpieczenia</th>
+        <th>Nazwa</th>
         <td>{{ iso_req.name }}</td>
     </tr>
-    {% if iso_req.category %}
+    {% if iso_req.objective %}
     <tr>
-        <th>Kategoria</th>
-        <td>{{ iso_req.category }}</td>
+        <th>Domena</th>
+        <td>{{ iso_req.objective.domain }}</td>
+    </tr>
+    <tr>
+        <th>Cel wymagań</th>
+        <td>
+            {{ iso_req.objective }}
+            {% if iso_req.objective.objective_text %}
+            <br><em style="color: #555;">Cel: {{ iso_req.objective.objective_text }}</em>
+            {% endif %}
+        </td>
     </tr>
     {% endif %}
     {% if iso_req.description %}
     <tr>
-        <th>Opis zabezpieczenia</th>
+        <th>Opis wymagania</th>
         <td>{{ iso_req.description|linebreaks }}</td>
     </tr>
     {% endif %}
@@ -36,18 +46,18 @@
         <th>Czy stosujemy?</th>
         <td>
             {% if iso_req.is_applied == 'yes' %}
-                ✓ Tak
+                <span style="color: green;">✓ Tak</span>
             {% elif iso_req.is_applied == 'no' %}
-                ✗ Nie
+                <span style="color: red;">✗ Nie</span>
             {% elif iso_req.is_applied == 'partial' %}
-                ◐ Częściowo
+                <span style="color: orange;">◐ Częściowo</span>
             {% else %}
-                — Nie dotyczy
+                <span style="color: gray;">— Nie dotyczy</span>
             {% endif %}
         </td>
     </tr>
     <tr>
-        <th>Sposób realizacji / Dokument referencyjny</th>
+        <th>Sposób realizacji</th>
         <td>
             {% if iso_req.implementation_method %}
                 {{ iso_req.implementation_method|linebreaks }}
@@ -66,27 +76,60 @@
         <th>Data utworzenia</th>
         <td>
             {{ iso_req.created_at|date:"Y-m-d H:i" }}
-            {% if iso_req.created_by %}
-                (przez {{ iso_req.created_by.username }})
-            {% endif %}
+            {% if iso_req.created_by %}(przez {{ iso_req.created_by.username }}){% endif %}
         </td>
     </tr>
     <tr>
         <th>Ostatnia modyfikacja</th>
         <td>
             {{ iso_req.updated_at|date:"Y-m-d H:i" }}
-            {% if iso_req.updated_by %}
-                (przez {{ iso_req.updated_by.username }})
-            {% endif %}
+            {% if iso_req.updated_by %}(przez {{ iso_req.updated_by.username }}){% endif %}
         </td>
     </tr>
 </table>
 
+<!-- Załączniki (pliki) -->
+<h3>📎 Pliki / załączniki</h3>
+
+{% if attachments %}
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Tytuł</th>
+            <th>Plik</th>
+            <th>Dodano</th>
+            <th>Przez</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for att in attachments %}
+        <tr>
+            <td>{{ att.title }}</td>
+            <td>{{ att.get_filename }}</td>
+            <td>{{ att.uploaded_at|date:"Y-m-d H:i" }}</td>
+            <td>{{ att.uploaded_by.username|default:"-" }}</td>
+            <td>
+                <a href="{% url 'dictionary:attachment_download' att.pk %}">Pobierz</a>
+                | <a href="{% url 'dictionary:attachment_delete' att.pk %}">Usuń</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p><em>Brak załączników.</em></p>
+{% endif %}
+
+<p>
+    <a href="{% url 'dictionary:attachment_add' iso_req.pk %}">+ Dodaj plik</a>
+</p>
+
 <!-- Powiązane dokumenty -->
-<h3>Powiązane dokumenty</h3>
+<h3>📄 Powiązane dokumenty</h3>
 
 {% if document_mappings %}
-<table border="1" cellpadding="10" cellspacing="0">
+<table border="1" cellpadding="8" cellspacing="0">
     <thead>
         <tr>
             <th>Dokument</th>

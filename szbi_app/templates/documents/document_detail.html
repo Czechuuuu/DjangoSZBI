@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}{{ object.title }} - SZBI{% endblock %}
+{% block title %}{{ object.designation }} - {{ object.title }} - SZBI{% endblock %}
 
 {% block content %}
-<h2>{{ object.title }}</h2>
+<h2>[{{ object.designation }}] {{ object.title }}</h2>
 
 <div>
     <a href="{% url 'documents:list' %}">← Powrót do listy</a>
@@ -12,14 +12,23 @@
 </div>
 
 <!-- Informacje o dokumencie -->
+<h3>Informacje podstawowe</h3>
 <table border="1" cellpadding="15" cellspacing="0">
+    <tr>
+        <th>Oznaczenie</th>
+        <td><strong>{{ object.designation }}</strong></td>
+    </tr>
     <tr>
         <th>Tytuł</th>
         <td><strong>{{ object.title }}</strong></td>
     </tr>
     <tr>
+        <th>Rodzaj</th>
+        <td>{{ object.get_document_type_display }}</td>
+    </tr>
+    <tr>
         <th>Status</th>
-        <td>{{ object.get_status_display }}</td>
+        <td><strong>{{ object.get_status_display }}</strong></td>
     </tr>
     {% if object.description %}
     <tr>
@@ -40,6 +49,162 @@
         <td>{{ object.updated_at|date:"Y-m-d H:i" }}</td>
     </tr>
 </table>
+
+<!-- Workflow -->
+<h3>Workflow — zmiana statusu</h3>
+{% if allowed_transitions %}
+<form method="post" action="{% url 'documents:workflow_transition' object.pk %}">
+    {% csrf_token %}
+    <table>
+        <tr>
+            <td>{{ workflow_form.new_status }}</td>
+            <td>{{ workflow_form.comment }}</td>
+            <td><button type="submit">Zmień status</button></td>
+        </tr>
+    </table>
+</form>
+{% else %}
+<p><em>Brak dozwolonych przejść statusu z bieżącego stanu ({{ object.get_status_display }}).</em></p>
+{% endif %}
+
+<!-- Wersje dokumentu -->
+<h3>Wersje dokumentu</h3>
+
+<p>
+    <a href="{% url 'documents:add_version' object.pk %}">+ Dodaj nową wersję</a>
+</p>
+
+{% if current_version %}
+<p>
+    <strong>Obowiązująca wersja:</strong> v{{ current_version.version_number }}
+    (dodana {{ current_version.created_at|date:"Y-m-d H:i" }} przez {{ current_version.created_by.username }})
+    | <a href="{% url 'documents:download_version' object.pk current_version.pk %}">Pobierz plik</a>
+</p>
+{% else %}
+<p><em>Brak oznaczonej wersji obowiązującej.</em></p>
+{% endif %}
+
+{% if versions %}
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Wersja</th>
+            <th>Plik</th>
+            <th>Opis zmian</th>
+            <th>Dodał</th>
+            <th>Data</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for version in versions %}
+        <tr {% if version.is_current %}style="background-color: #e8f5e9;"{% endif %}>
+            <td>
+                <strong>v{{ version.version_number }}</strong>
+                {% if version.is_current %} ✓ obowiązująca{% endif %}
+            </td>
+            <td>
+                {% if version.file %}
+                <a href="{% url 'documents:download_version' object.pk version.pk %}">Pobierz</a>
+                {% else %}
+                -
+                {% endif %}
+            </td>
+            <td>{{ version.change_description|default:"-"|truncatewords:20 }}</td>
+            <td>{{ version.created_by.username }}</td>
+            <td>{{ version.created_at|date:"Y-m-d H:i" }}</td>
+            <td>
+                {% if not version.is_current %}
+                <form method="post" action="{% url 'documents:set_current_version' object.pk version.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" onclick="return confirm('Czy na pewno ustawić v{{ version.version_number }} jako obowiązującą?')">Ustaw jako obowiązującą</button>
+                </form>
+                {% else %}
+                <em>aktywna</em>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p><em>Brak wersji dokumentu. Dodaj pierwszą wersję z plikiem.</em></p>
+{% endif %}
+
+<!-- Zapoznanie się -->
+<h3>Zapoznanie się z dokumentem</h3>
+
+{% if current_version %}
+    {% if user_acknowledged %}
+    <p>✓ <strong>Potwierdziłeś zapoznanie się</strong> z bieżącą wersją (v{{ current_version.version_number }}).</p>
+    {% else %}
+    <form method="post" action="{% url 'documents:acknowledge' object.pk %}">
+        {% csrf_token %}
+        <p>
+            <button type="submit">Potwierdź zapoznanie się z dokumentem (v{{ current_version.version_number }})</button>
+        </p>
+    </form>
+    {% endif %}
+{% else %}
+    <p><em>Brak obowiązującej wersji — nie można potwierdzić zapoznania.</em></p>
+{% endif %}
+
+{% if acknowledgements %}
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Użytkownik</th>
+            <th>Wersja</th>
+            <th>Data zapoznania</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ack in acknowledgements %}
+        <tr>
+            <td>{{ ack.user.username }}</td>
+            <td>{% if ack.version %}v{{ ack.version.version_number }}{% else %}-{% endif %}</td>
+            <td>{{ ack.acknowledged_at|date:"Y-m-d H:i" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<!-- Dostęp do dokumentu -->
+<h3>Dostęp do dokumentu</h3>
+
+<p>
+    <a href="{% url 'documents:grant_access' object.pk %}">+ Nadaj dostęp grupie</a>
+</p>
+
+{% if access_entries %}
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Grupa uprawnień</th>
+            <th>Poziom dostępu</th>
+            <th>Nadał</th>
+            <th>Data</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for access in access_entries %}
+        <tr>
+            <td><strong>{{ access.permission_group.name }}</strong></td>
+            <td>{{ access.get_access_level_display }}</td>
+            <td>{{ access.granted_by.username|default:"-" }}</td>
+            <td>{{ access.granted_at|date:"Y-m-d H:i" }}</td>
+            <td>
+                <a href="{% url 'documents:revoke_access' object.pk access.pk %}">Cofnij</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p><em>Brak nadanych dostępów.</em></p>
+{% endif %}
 
 <!-- Powiązane wymagania ISO -->
 <h3>Powiązane wymagania ISO</h3>
@@ -84,6 +249,33 @@
 </table>
 {% else %}
 <p><em>Ten dokument nie jest jeszcze powiązany z żadnymi wymaganiami ISO.</em></p>
+{% endif %}
+
+<!-- Historia zmian -->
+<h3>Historia zmian (log)</h3>
+{% if logs %}
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Użytkownik</th>
+            <th>Akcja</th>
+            <th>Opis</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.timestamp|date:"Y-m-d H:i" }}</td>
+            <td>{{ log.user.username }}</td>
+            <td>{{ log.get_action_display }}</td>
+            <td>{{ log.description|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p><em>Brak wpisów w historii.</em></p>
 {% endif %}
 
 {% endblock %}
