@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Edytuj deklarację{% else %}Nowa deklaracja{% endif %} - SZBI{% endblock %}
+
+{% block content %}
+<h2>{% if object %}Edytuj deklarację: {{ object.designation }}{% else %}Nowa Deklaracja Stosowania{% endif %}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <p>
+        <label for="{{ form.designation.id_for_label }}">Oznaczenie*</label><br>
+        {{ form.designation }}
+        {% if form.designation.help_text %}<small>{{ form.designation.help_text }}</small>{% endif %}
+        {% if form.designation.errors %}<br><span style="color: red;">{{ form.designation.errors }}</span>{% endif %}
+    </p>
+    
+    <p>
+        <label for="{{ form.name.id_for_label }}">Nazwa*</label><br>
+        {{ form.name }}
+        {% if form.name.errors %}<br><span style="color: red;">{{ form.name.errors }}</span>{% endif %}
+    </p>
+    
+    <p>
+        <label for="{{ form.description.id_for_label }}">Opis</label><br>
+        {{ form.description }}
+    </p>
+    
+    <p>
+        <label for="{{ form.version.id_for_label }}">Wersja</label><br>
+        {{ form.version }}
+    </p>
+    
+    <p>
+        <label for="{{ form.effective_date.id_for_label }}">Data obowiązywania</label><br>
+        {{ form.effective_date }}
+    </p>
+    
+    <p>
+        <button type="submit">{% if object %}Zapisz zmiany{% else %}Utwórz deklarację{% endif %}</button>
+        <a href="{% url 'soa:list' %}">Anuluj</a>
+    </p>
+</form>
+
+{% endblock %}

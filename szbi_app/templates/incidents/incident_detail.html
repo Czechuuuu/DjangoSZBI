@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Incydent #{{ incident.pk }} - SZBI{% endblock %}
+
+{% block content %}
+<h2>Incydent #{{ incident.pk }}: {{ incident.title }}</h2>
+
+<p>
+    <a href="{% url 'incidents:list' %}">← Powrót do listy</a> |
+    <a href="{% url 'incidents:my_list' %}">Moje zgłoszenia</a> |
+    <a href="{% url 'incidents:delete' incident.pk %}" style="color: red;">Usuń</a>
+</p>
+
+<!-- STATUS WORKFLOW -->
+<div style="background: #f0f0f0; padding: 10px; margin-bottom: 20px;">
+    <strong>Status:</strong> {{ incident.get_status_display }}
+    
+    {% if incident.get_next_status %}
+    <form method="post" action="{% url 'incidents:advance_status' incident.pk %}" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit">Przejdź do: 
+            {% if incident.status == 'reported' %}Analiza
+            {% elif incident.status == 'analysis' %}Reakcja
+            {% elif incident.status == 'response' %}Działanie
+            {% elif incident.status == 'action' %}Zakończenie
+            {% endif %}
+        </button>
+    </form>
+    {% endif %}
+    
+    <br>
+    <small>
+        Workflow: 
+        <span {% if incident.status == 'reported' %}style="font-weight: bold;"{% endif %}>Zgłoszony</span> → 
+        <span {% if incident.status == 'analysis' %}style="font-weight: bold;"{% endif %}>Analiza</span> → 
+        <span {% if incident.status == 'response' %}style="font-weight: bold;"{% endif %}>Reakcja</span> → 
+        <span {% if incident.status == 'action' %}style="font-weight: bold;"{% endif %}>Działanie</span> → 
+        <span {% if incident.status == 'closed' %}style="font-weight: bold;"{% endif %}>Zakończony</span>
+    </small>
+</div>
+
+<!-- DANE ZGŁOSZENIA -->
+<h3>Zgłoszenie</h3>
+<table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+        <th>Temat</th>
+        <td>{{ incident.title }}</td>
+    </tr>
+    <tr>
+        <th>Opis</th>
+        <td>{{ incident.description|linebreaks }}</td>
+    </tr>
+    <tr>
+        <th>Data wystąpienia</th>
+        <td>{{ incident.occurred_at }}</td>
+    </tr>
+    <tr>
+        <th>Okoliczności</th>
+        <td>{{ incident.circumstances|linebreaks }}</td>
+    </tr>
+    <tr>
+        <th>Dotknięte aktywa</th>
+        <td>
+            {% for asset in incident.affected_assets.all %}
+                <a href="{% url 'assets:detail' asset.pk %}">{{ asset.designation }}</a>{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                -
+            {% endfor %}
+        </td>
+    </tr>
+    <tr>
+        <th>Zgłaszający</th>
+        <td>{{ incident.reporter.username }}</td>
+    </tr>
+    <tr>
+        <th>Data zgłoszenia</th>
+        <td>{{ incident.created_at }}</td>
+    </tr>
+</table>
+
+<!-- ANALIZA -->
+<h3>Analiza</h3>
+{% if incident.status != 'reported' or user.is_staff %}
+<form method="post" action="{% url 'incidents:update_analysis' incident.pk %}">
+    {% csrf_token %}
+    <table border="1" cellspacing="0" cellpadding="5">
+        <tr>
+            <th>Poważny incydent</th>
+            <td>
+                {{ analysis_form.is_serious }}
+                {% if incident.is_serious %}<span style="color: red;">⚠ TAK</span>{% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Dotyczy danych osobowych</th>
+            <td>
+                {{ analysis_form.involves_personal_data }}
+                {% if incident.involves_personal_data %}<span style="color: orange;">🔒 TAK</span>{% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Klasyfikacja</th>
+            <td>{{ analysis_form.severity }}</td>
+        </tr>
+        <tr>
+            <th>Kategoria</th>
+            <td>{{ analysis_form.category }}</td>
+        </tr>
+        <tr>
+            <th>Przypisany do</th>
+            <td>{{ analysis_form.assigned_to }}</td>
+        </tr>
+        <tr>
+            <th>Notatki z analizy</th>
+            <td>{{ analysis_form.analysis_notes }}</td>
+        </tr>
+    </table>
+    <p><button type="submit">Zapisz analizę</button></p>
+</form>
+{% else %}
+<p><em>Analiza dostępna po zmianie statusu.</em></p>
+{% endif %}
+
+<!-- REAKCJA -->
+<h3>Reakcja</h3>
+{% if incident.status in 'response,action,closed' or user.is_staff %}
+<form method="post" action="{% url 'incidents:update_response' incident.pk %}">
+    {% csrf_token %}
+    <table border="1" cellspacing="0" cellpadding="5">
+        <tr>
+            <th>Podjęte działania</th>
+            <td>{{ response_form.response_actions }}</td>
+        </tr>
+        <tr>
+            <th>Notatki</th>
+            <td>{{ response_form.response_notes }}</td>
+        </tr>
+    </table>
+    <p><button type="submit">Zapisz reakcję</button></p>
+</form>
+{% else %}
+<p><em>Reakcja dostępna w fazie "Reakcja".</em></p>
+{% endif %}
+
+<!-- DZIAŁANIE -->
+<h3>Działanie po incydencie</h3>
+{% if incident.status in 'action,closed' or user.is_staff %}
+<form method="post" action="{% url 'incidents:update_action' incident.pk %}">
+    {% csrf_token %}
+    <table border="1" cellspacing="0" cellpadding="5">
+        <tr>
+            <th>Działania naprawcze/zapobiegawcze</th>
+            <td>{{ action_form.post_incident_actions }}</td>
+        </tr>
+    </table>
+    <p><button type="submit">Zapisz działania</button></p>
+</form>
+{% else %}
+<p><em>Działania dostępne w fazie "Działanie".</em></p>
+{% endif %}
+
+<!-- ZAKOŃCZENIE -->
+<h3>Zakończenie</h3>
+{% if incident.status == 'closed' %}
+<table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+        <th>Wnioski</th>
+        <td>{{ incident.conclusions|default:"-"|linebreaks }}</td>
+    </tr>
+    <tr>
+        <th>Data zamknięcia</th>
+        <td>{{ incident.closed_at }}</td>
+    </tr>
+</table>
+{% elif incident.status == 'action' or user.is_staff %}
+<form method="post" action="{% url 'incidents:close' incident.pk %}">
+    {% csrf_token %}
+    <p>
+        <label>Wnioski:</label><br>
+        {{ close_form.conclusions }}
+    </p>
+    <p><button type="submit" style="color: green;">Zamknij incydent</button></p>
+</form>
+{% else %}
+<p><em>Zakończenie dostępne w fazie "Działanie".</em></p>
+{% endif %}
+
+<!-- NOTATKI -->
+<h3>Notatki i komentarze</h3>
+<form method="post" action="{% url 'incidents:add_note' incident.pk %}">
+    {% csrf_token %}
+    <p>
+        {{ note_form.note_type }}
+        {{ note_form.content }}
+        <button type="submit">Dodaj notatkę</button>
+    </p>
+</form>
+
+{% if notes %}
+<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Typ</th>
+            <th>Autor</th>
+            <th>Treść</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for note in notes %}
+        <tr>
+            <td>{{ note.created_at|date:"Y-m-d H:i" }}</td>
+            <td>{{ note.get_note_type_display }}</td>
+            <td>{{ note.author|default:"-" }}</td>
+            <td>{{ note.content|linebreaks }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Brak notatek.</p>
+{% endif %}
+
+<!-- HISTORIA -->
+<h3>Historia zmian</h3>
+{% if logs %}
+<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Użytkownik</th>
+            <th>Akcja</th>
+            <th>Opis</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.timestamp|date:"Y-m-d H:i" }}</td>
+            <td>{{ log.user|default:"-" }}</td>
+            <td>{{ log.get_action_display }}</td>
+            <td>{{ log.description }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Brak wpisów w historii.</p>
+{% endif %}
+
+{% endblock %}

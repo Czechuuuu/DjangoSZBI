@@ -181,6 +181,23 @@ class Employee(models.Model):
         
         return permissions
 
+    def has_permission(self, permission_name):
+        """Sprawdza czy pracownik ma dane uprawnienie (po nazwie)"""
+        permissions = self.get_permissions()
+        return any(p.name == permission_name for p in permissions)
+    
+    def has_any_permission(self, permission_names):
+        """Sprawdza czy pracownik ma którekolwiek z podanych uprawnień"""
+        permissions = self.get_permissions()
+        perm_names = {p.name for p in permissions}
+        return bool(perm_names & set(permission_names))
+    
+    def has_all_permissions(self, permission_names):
+        """Sprawdza czy pracownik ma wszystkie podane uprawnienia"""
+        permissions = self.get_permissions()
+        perm_names = {p.name for p in permissions}
+        return set(permission_names).issubset(perm_names)
+
 
 class EmployeePermissionGroup(models.Model):
     """Bezpośrednie przypisanie grupy uprawnień do pracownika"""

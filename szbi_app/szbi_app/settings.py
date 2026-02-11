@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'core',
     'documents',
     'dictionary',
+    'assets',
+    'soa',
+    'incidents',
 ]
 
 MIDDLEWARE = [

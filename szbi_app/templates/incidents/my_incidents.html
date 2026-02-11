@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Moje zgłoszenia - SZBI{% endblock %}
+
+{% block content %}
+<h2>Moje zgłoszenia incydentów</h2>
+
+<p>
+    <a href="{% url 'incidents:report' %}">+ Zgłoś nowy incydent</a> |
+    <a href="{% url 'incidents:list' %}">Wszystkie incydenty</a>
+</p>
+
+{% if incidents %}
+<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Temat</th>
+            <th>Data zgłoszenia</th>
+            <th>Status</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for incident in incidents %}
+        <tr>
+            <td>{{ incident.pk }}</td>
+            <td><a href="{% url 'incidents:detail' incident.pk %}">{{ incident.title }}</a></td>
+            <td>{{ incident.created_at|date:"Y-m-d H:i" }}</td>
+            <td>{{ incident.get_status_display }}</td>
+            <td>
+                <a href="{% url 'incidents:detail' incident.pk %}">Szczegóły</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nie masz żadnych zgłoszeń. <a href="{% url 'incidents:report' %}">Zgłoś incydent</a>.</p>
+{% endif %}
+
+{% endblock %}

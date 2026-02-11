@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Usuń deklarację - SZBI{% endblock %}
+
+{% block content %}
+<h2>Usuwanie deklaracji</h2>
+
+<p>Czy na pewno chcesz usunąć deklarację <strong>{{ object.designation }} - {{ object.name }}</strong>?</p>
+
+<p style="color: red;">Ta operacja usunie również wszystkie pozycje w tej deklaracji i jest nieodwracalna!</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" style="color: red;">Tak, usuń</button>
+    <a href="{% url 'soa:detail' object.pk %}">Anuluj</a>
+</form>
+{% endblock %}

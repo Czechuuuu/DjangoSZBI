@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Deklaracje Stosowania - SZBI{% endblock %}
+
+{% block content %}
+<h2>Deklaracje Stosowania (SoA)</h2>
+
+<p>
+    <a href="{% url 'soa:create' %}">+ Nowa deklaracja</a>
+</p>
+
+<!-- Filtry -->
+<form method="get" style="margin-bottom: 20px;">
+    <fieldset>
+        <legend>Filtry</legend>
+        <label>Status:
+            <select name="status">
+                <option value="">-- Wszystkie --</option>
+                {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </label>
+        
+        <label>Szukaj:
+            <input type="text" name="q" value="{{ current_search }}" placeholder="Oznaczenie, nazwa...">
+        </label>
+        
+        <button type="submit">Filtruj</button>
+        <a href="{% url 'soa:list' %}">Wyczyść</a>
+    </fieldset>
+</form>
+
+{% if declarations %}
+<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Oznaczenie</th>
+            <th>Nazwa</th>
+            <th>Wersja</th>
+            <th>Status</th>
+            <th>Pozycji</th>
+            <th>Właściciel</th>
+            <th>Ostatnia modyfikacja</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for decl in declarations %}
+        <tr>
+            <td><a href="{% url 'soa:detail' decl.pk %}">{{ decl.designation }}</a></td>
+            <td>{{ decl.name }}</td>
+            <td>{{ decl.version }}</td>
+            <td>{{ decl.get_status_display }}</td>
+            <td>{{ decl.entries_count }}</td>
+            <td>{{ decl.owner.username }}</td>
+            <td>{{ decl.updated_at|date:"Y-m-d H:i" }}</td>
+            <td>
+                <a href="{% url 'soa:detail' decl.pk %}">Szczegóły</a> |
+                <a href="{% url 'soa:update' decl.pk %}">Edytuj</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Brak deklaracji do wyświetlenia. <a href="{% url 'soa:create' %}">Utwórz pierwszą deklarację</a>.</p>
+{% endif %}
+
+{% endblock %}

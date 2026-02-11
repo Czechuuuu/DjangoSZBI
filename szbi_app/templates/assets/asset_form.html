@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Edytuj aktywo{% else %}Nowe aktywo{% endif %} - SZBI{% endblock %}
+
+{% block content %}
+<h2>{% if object %}Edytuj aktywo: {{ object.designation }}{% else %}Dodaj nowe aktywo{% endif %}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <fieldset>
+        <legend>Dane identyfikacyjne</legend>
+        
+        <p>
+            <label for="{{ form.designation.id_for_label }}">Oznaczenie*</label><br>
+            {{ form.designation }}
+            {% if form.designation.help_text %}<small>{{ form.designation.help_text }}</small>{% endif %}
+            {% if form.designation.errors %}<br><span style="color: red;">{{ form.designation.errors }}</span>{% endif %}
+        </p>
+        
+        <p>
+            <label for="{{ form.name.id_for_label }}">Nazwa*</label><br>
+            {{ form.name }}
+            {% if form.name.errors %}<br><span style="color: red;">{{ form.name.errors }}</span>{% endif %}
+        </p>
+        
+        <p>
+            <label for="{{ form.description.id_for_label }}">Opis</label><br>
+            {{ form.description }}
+        </p>
+    </fieldset>
+    
+    <fieldset>
+        <legend>Klasyfikacja</legend>
+        
+        <p>
+            <label for="{{ form.category.id_for_label }}">Kategoria*</label><br>
+            {{ form.category }}
+            {% if form.category.errors %}<br><span style="color: red;">{{ form.category.errors }}</span>{% endif %}
+        </p>
+        
+        <p>
+            <label for="{{ form.status.id_for_label }}">Status</label><br>
+            {{ form.status }}
+        </p>
+        
+        <p>
+            <label for="{{ form.criticality.id_for_label }}">Krytyczność</label><br>
+            {{ form.criticality }}
+        </p>
+    </fieldset>
+    
+    <fieldset>
+        <legend>Właściciel i lokalizacja</legend>
+        
+        <p>
+            <label for="{{ form.owner.id_for_label }}">Właściciel*</label><br>
+            {{ form.owner }}
+            {% if form.owner.errors %}<br><span style="color: red;">{{ form.owner.errors }}</span>{% endif %}
+        </p>
+        
+        <p>
+            <label for="{{ form.department.id_for_label }}">Dział</label><br>
+            {{ form.department }}
+        </p>
+        
+        <p>
+            <label for="{{ form.location.id_for_label }}">Lokalizacja</label><br>
+            {{ form.location }}
+            {% if form.location.help_text %}<small>{{ form.location.help_text }}</small>{% endif %}
+        </p>
+    </fieldset>
+    
+    <fieldset>
+        <legend>Daty i wartość</legend>
+        
+        <p>
+            <label for="{{ form.acquisition_date.id_for_label }}">Data nabycia</label><br>
+            {{ form.acquisition_date }}
+        </p>
+        
+        <p>
+            <label for="{{ form.warranty_expiry.id_for_label }}">Data wygaśnięcia gwarancji</label><br>
+            {{ form.warranty_expiry }}
+        </p>
+        
+        <p>
+            <label for="{{ form.value.id_for_label }}">Wartość (PLN)</label><br>
+            {{ form.value }}
+        </p>
+    </fieldset>
+    
+    <p>
+        <button type="submit">{% if object %}Zapisz zmiany{% else %}Utwórz aktywo{% endif %}</button>
+        <a href="{% url 'assets:list' %}">Anuluj</a>
+    </p>
+</form>
+
+{% endblock %}

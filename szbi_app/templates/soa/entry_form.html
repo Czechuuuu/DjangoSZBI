@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}{% if entry %}Edytuj pozycję{% else %}Dodaj pozycję{% endif %} - SZBI{% endblock %}
+
+{% block content %}
+<h2>{% if entry %}Edytuj pozycję: {{ entry.requirement.iso_id }}{% else %}Dodaj pozycję do deklaracji {{ declaration.designation }}{% endif %}</h2>
+
+<p>
+    <a href="{% url 'soa:detail' declaration.pk %}">← Powrót do deklaracji</a>
+</p>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <fieldset>
+        <legend>Wybór wymagania ISO</legend>
+        
+        <p>
+            <label for="id_domain">Domena ISO</label><br>
+            {{ form.domain }}
+        </p>
+        
+        <p>
+            <label for="id_objective">Cel wymagań</label><br>
+            {{ form.objective }}
+        </p>
+        
+        <p>
+            <label for="id_requirement">Wymaganie*</label><br>
+            {{ form.requirement }}
+            {% if form.requirement.errors %}<br><span style="color: red;">{{ form.requirement.errors }}</span>{% endif %}
+        </p>
+    </fieldset>
+    
+    <fieldset>
+        <legend>Szczegóły stosowania</legend>
+        
+        <p>
+            <label for="{{ form.applicability.id_for_label }}">Stosowanie*</label><br>
+            {{ form.applicability }}
+        </p>
+        
+        <p>
+            <label for="{{ form.responsible_person.id_for_label }}">Osoba odpowiedzialna</label><br>
+            {{ form.responsible_person }}
+        </p>
+        
+        <p>
+            <label for="{{ form.related_documents.id_for_label }}">Powiązane dokumenty</label><br>
+            {{ form.related_documents }}
+            <small>Przytrzymaj Ctrl aby wybrać wiele dokumentów</small>
+        </p>
+        
+        <p>
+            <label for="{{ form.justification.id_for_label }}">Uzasadnienie*</label><br>
+            {{ form.justification }}
+            {% if form.justification.errors %}<br><span style="color: red;">{{ form.justification.errors }}</span>{% endif %}
+        </p>
+        
+        <p>
+            <label for="{{ form.additional_description.id_for_label }}">Dodatkowy opis</label><br>
+            {{ form.additional_description }}
+        </p>
+    </fieldset>
+    
+    <p>
+        <button type="submit">{% if entry %}Zapisz zmiany{% else %}Dodaj pozycję{% endif %}</button>
+        <a href="{% url 'soa:detail' declaration.pk %}">Anuluj</a>
+    </p>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const domainSelect = document.getElementById('id_domain');
+    const objectiveSelect = document.getElementById('id_objective');
+    const requirementSelect = document.getElementById('id_requirement');
+    
+    // Ładowanie celów po wyborze domeny
+    domainSelect.addEventListener('change', function() {
+        const domainId = this.value;
+        objectiveSelect.innerHTML = '<option value="">---------</option>';
+        requirementSelect.innerHTML = '<option value="">---------</option>';
+        
+        if (domainId) {
+            fetch(`/deklaracje/api/objectives/${domainId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(obj => {
+                        const option = document.createElement('option');
+                        option.value = obj.id;
+                        option.textContent = `${obj.code} ${obj.name}`;
+                        objectiveSelect.appendChild(option);
+                    });
+                });
+        }
+    });
+    
+    // Ładowanie wymagań po wyborze celu
+    objectiveSelect.addEventListener('change', function() {
+        const objectiveId = this.value;
+        requirementSelect.innerHTML = '<option value="">---------</option>';
+        
+        if (objectiveId) {
+            fetch(`/deklaracje/api/requirements/${objectiveId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(req => {
+                        const option = document.createElement('option');
+                        option.value = req.id;
+                        option.textContent = `${req.iso_id} ${req.name}`;
+                        requirementSelect.appendChild(option);
+                    });
+                });
+        }
+    });
+});
+</script>
+
+{% endblock %}

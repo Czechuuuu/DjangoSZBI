@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Usuń aktywo - SZBI{% endblock %}
+
+{% block content %}
+<h2>Usuwanie aktywa</h2>
+
+<p>Czy na pewno chcesz usunąć aktywo <strong>{{ object.designation }} - {{ object.name }}</strong>?</p>
+
+<p style="color: red;">Ta operacja jest nieodwracalna!</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" style="color: red;">Tak, usuń</button>
+    <a href="{% url 'assets:detail' object.pk %}">Anuluj</a>
+</form>
+{% endblock %}

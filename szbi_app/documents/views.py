@@ -16,6 +16,16 @@ from .forms import (
     DocumentAccessForm, WorkflowTransitionForm
 )
 from dictionary.models import ISORequirement
+from core.mixins import (
+    SZBIPermissionRequiredMixin, szbi_permission_required,
+    PERM_DOCUMENTS_ADMIN, PERM_DOCUMENTS_OWNER, PERM_DOCUMENTS_MANAGER,
+    PERM_DOCUMENTS_APPROVER
+)
+
+# Uprawnienia do przeglądania dokumentów
+DOCS_VIEW_PERMISSIONS = [PERM_DOCUMENTS_ADMIN, PERM_DOCUMENTS_OWNER, PERM_DOCUMENTS_MANAGER, PERM_DOCUMENTS_APPROVER]
+# Uprawnienia do edycji dokumentów
+DOCS_EDIT_PERMISSIONS = [PERM_DOCUMENTS_ADMIN, PERM_DOCUMENTS_OWNER, PERM_DOCUMENTS_MANAGER]
 
 
 def _log_action(document, user, action, description=""):
@@ -28,9 +38,10 @@ def _log_action(document, user, action, description=""):
     )
 
 
-class DocumentListView(LoginRequiredMixin, ListView):
+class DocumentListView(SZBIPermissionRequiredMixin, ListView):
     model = Document
     template_name = "documents/document_list.html"
+    szbi_permission_required = DOCS_VIEW_PERMISSIONS
     
     def get_queryset(self):
         qs = Document.objects.prefetch_related('iso_mappings', 'versions').all()
@@ -62,11 +73,12 @@ class DocumentListView(LoginRequiredMixin, ListView):
         return context
 
 
-class DocumentCreateView(LoginRequiredMixin, CreateView):
+class DocumentCreateView(SZBIPermissionRequiredMixin, CreateView):
     model = Document
     form_class = DocumentForm
     template_name = "documents/document_form.html"
     success_url = reverse_lazy('documents:list')
+    szbi_permission_required = [PERM_DOCUMENTS_ADMIN, PERM_DOCUMENTS_OWNER]
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -77,9 +89,10 @@ class DocumentCreateView(LoginRequiredMixin, CreateView):
         return response
 
 
-class DocumentDetailView(LoginRequiredMixin, DetailView):
+class DocumentDetailView(SZBIPermissionRequiredMixin, DetailView):
     model = Document
     template_name = "documents/document_detail.html"
+    szbi_permission_required = DOCS_VIEW_PERMISSIONS
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -108,10 +121,11 @@ class DocumentDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class DocumentUpdateView(LoginRequiredMixin, UpdateView):
+class DocumentUpdateView(SZBIPermissionRequiredMixin, UpdateView):
     model = Document
     form_class = DocumentForm
     template_name = "documents/document_form.html"
+    szbi_permission_required = DOCS_EDIT_PERMISSIONS
     
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -126,7 +140,7 @@ class DocumentUpdateView(LoginRequiredMixin, UpdateView):
 
 # === WERSJE ===
 
-@login_required
+@szbi_permission_required(DOCS_EDIT_PERMISSIONS)
 def document_add_version(request, pk):
     """Dodawanie nowej wersji dokumentu"""
     document = get_object_or_404(Document, pk=pk)
@@ -172,7 +186,7 @@ def document_add_version(request, pk):
     })
 
 
-@login_required
+@szbi_permission_required(DOCS_EDIT_PERMISSIONS)
 def document_set_current_version(request, pk, version_pk):
     """Ustawienie wersji jako obowiązującej"""
     document = get_object_or_404(Document, pk=pk)
@@ -189,7 +203,7 @@ def document_set_current_version(request, pk, version_pk):
     return redirect('documents:detail', pk=pk)
 
 
-@login_required
+@szbi_permission_required(DOCS_VIEW_PERMISSIONS)
 def document_download_version(request, pk, version_pk):
     """Pobieranie pliku wersji dokumentu"""
     document = get_object_or_404(Document, pk=pk)
@@ -204,7 +218,7 @@ def document_download_version(request, pk, version_pk):
 
 # === WORKFLOW ===
 
-@login_required
+@szbi_permission_required([PERM_DOCUMENTS_ADMIN, PERM_DOCUMENTS_OWNER, PERM_DOCUMENTS_MANAGER, PERM_DOCUMENTS_APPROVER])
 def document_workflow_transition(request, pk):
     """Zmiana statusu dokumentu (workflow)"""
     document = get_object_or_404(Document, pk=pk)
@@ -237,7 +251,7 @@ def document_workflow_transition(request, pk):
 
 # === DOSTĘP ===
 
-@login_required
+@szbi_permission_required([PERM_DOCUMENTS_ADMIN, PERM_DOCUMENTS_OWNER])
 def document_grant_access(request, pk):
     """Nadawanie dostępu do dokumentu przez grupę uprawnień"""
     document = get_object_or_404(Document, pk=pk)
@@ -276,7 +290,7 @@ def document_grant_access(request, pk):
     })
 
 
-@login_required
+@szbi_permission_required([PERM_DOCUMENTS_ADMIN, PERM_DOCUMENTS_OWNER])
 def document_revoke_access(request, pk, access_pk):
     """Cofanie dostępu do dokumentu"""
     document = get_object_or_404(Document, pk=pk)
@@ -372,7 +386,7 @@ class SharedWithMeListView(LoginRequiredMixin, ListView):
 
 # === POWIĄZANIA ISO ===
 
-@login_required
+@szbi_permission_required(DOCS_EDIT_PERMISSIONS)
 def document_add_iso_mapping(request, pk):
     """Dodawanie powiązania dokumentu z wymaganiem ISO"""
     document = get_object_or_404(Document, pk=pk)
@@ -405,7 +419,7 @@ def document_add_iso_mapping(request, pk):
     })
 
 
-@login_required
+@szbi_permission_required(DOCS_EDIT_PERMISSIONS)
 def document_remove_iso_mapping(request, pk, mapping_pk):
     """Usuwanie powiązania dokumentu z wymaganiem ISO"""
     document = get_object_or_404(Document, pk=pk)

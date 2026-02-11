@@ -23,6 +23,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('documents/', include('documents.urls')),
+    path('aktywa/', include('assets.urls')),
+    path('deklaracje/', include('soa.urls')),
+    path('incydenty/', include('incidents.urls')),
     path('slownik/', include('dictionary.urls')),
     path('', include('core.urls')),
 ]

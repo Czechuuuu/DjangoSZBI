@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Zgłoś incydent - SZBI{% endblock %}
+
+{% block content %}
+<h2>Zgłoś incydent bezpieczeństwa</h2>
+
+<p>
+    <a href="{% url 'incidents:my_list' %}">← Moje zgłoszenia</a>
+</p>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <p>
+        <label for="{{ form.title.id_for_label }}">Temat*</label><br>
+        {{ form.title }}
+        {% if form.title.errors %}<br><span style="color: red;">{{ form.title.errors }}</span>{% endif %}
+    </p>
+    
+    <p>
+        <label for="{{ form.description.id_for_label }}">Opis incydentu*</label><br>
+        {{ form.description }}
+        {% if form.description.errors %}<br><span style="color: red;">{{ form.description.errors }}</span>{% endif %}
+    </p>
+    
+    <p>
+        <label for="{{ form.occurred_at.id_for_label }}">Kiedy wystąpił incydent?*</label><br>
+        {{ form.occurred_at }}
+        {% if form.occurred_at.errors %}<br><span style="color: red;">{{ form.occurred_at.errors }}</span>{% endif %}
+    </p>
+    
+    <p>
+        <label for="{{ form.circumstances.id_for_label }}">Okoliczności*</label><br>
+        {{ form.circumstances }}
+        {% if form.circumstances.help_text %}<small>{{ form.circumstances.help_text }}</small>{% endif %}
+        {% if form.circumstances.errors %}<br><span style="color: red;">{{ form.circumstances.errors }}</span>{% endif %}
+    </p>
+    
+    <p>
+        <label for="{{ form.affected_assets.id_for_label }}">Dotknięte aktywa</label><br>
+        {{ form.affected_assets }}
+        <small>Przytrzymaj Ctrl aby wybrać wiele aktywów (opcjonalne)</small>
+    </p>
+    
+    <p>
+        <button type="submit">Zgłoś incydent</button>
+        <a href="{% url 'incidents:my_list' %}">Anuluj</a>
+    </p>
+</form>
+
+{% endblock %}

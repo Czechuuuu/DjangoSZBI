@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}{{ asset.designation }} - SZBI{% endblock %}
+
+{% block content %}
+<h2>{{ asset.designation }} - {{ asset.name }}</h2>
+
+<p>
+    <a href="{% url 'assets:list' %}">← Powrót do listy</a> |
+    <a href="{% url 'assets:update' asset.pk %}">Edytuj</a> |
+    <a href="{% url 'assets:delete' asset.pk %}" style="color: red;">Usuń</a>
+</p>
+
+<h3>Dane podstawowe</h3>
+<table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+        <th>Oznaczenie</th>
+        <td>{{ asset.designation }}</td>
+    </tr>
+    <tr>
+        <th>Nazwa</th>
+        <td>{{ asset.name }}</td>
+    </tr>
+    <tr>
+        <th>Kategoria</th>
+        <td>{{ asset.category }}</td>
+    </tr>
+    <tr>
+        <th>Opis</th>
+        <td>{{ asset.description|default:"-"|linebreaks }}</td>
+    </tr>
+</table>
+
+<h3>Status i klasyfikacja</h3>
+<table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+        <th>Status</th>
+        <td>{{ asset.get_status_display }}</td>
+    </tr>
+    <tr>
+        <th>Krytyczność</th>
+        <td>{{ asset.get_criticality_display }}</td>
+    </tr>
+</table>
+
+<h3>Właściciel i lokalizacja</h3>
+<table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+        <th>Właściciel</th>
+        <td>{{ asset.owner.first_name }} {{ asset.owner.last_name }}</td>
+    </tr>
+    <tr>
+        <th>Dział</th>
+        <td>{{ asset.department|default:"-" }}</td>
+    </tr>
+    <tr>
+        <th>Lokalizacja</th>
+        <td>{{ asset.location|default:"-" }}</td>
+    </tr>
+</table>
+
+<h3>Daty i wartość</h3>
+<table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+        <th>Data nabycia</th>
+        <td>{{ asset.acquisition_date|default:"-" }}</td>
+    </tr>
+    <tr>
+        <th>Data wygaśnięcia gwarancji</th>
+        <td>{{ asset.warranty_expiry|default:"-" }}</td>
+    </tr>
+    <tr>
+        <th>Wartość</th>
+        <td>{% if asset.value %}{{ asset.value }} PLN{% else %}-{% endif %}</td>
+    </tr>
+</table>
+
+<h3>Metadane</h3>
+<table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+        <th>Data utworzenia</th>
+        <td>{{ asset.created_at }}</td>
+    </tr>
+    <tr>
+        <th>Ostatnia modyfikacja</th>
+        <td>{{ asset.updated_at }}</td>
+    </tr>
+    <tr>
+        <th>Utworzył</th>
+        <td>{{ asset.created_by|default:"-" }}</td>
+    </tr>
+</table>
+
+<h3>Historia zmian</h3>
+{% if logs %}
+<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Użytkownik</th>
+            <th>Akcja</th>
+            <th>Opis</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.timestamp }}</td>
+            <td>{{ log.user|default:"-" }}</td>
+            <td>{{ log.get_action_display }}</td>
+            <td>{{ log.description }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Brak wpisów w historii.</p>
+{% endif %}
+
+{% endblock %}

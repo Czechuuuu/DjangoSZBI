@@ -8,12 +8,6 @@ def load_permissions(apps, schema_editor):
     Permission = apps.get_model('core', 'Permission')
     
     PERMISSIONS = [
-        # AUDYTY
-        ('audits', 'Administrator audytów', 'Przeglądanie wszystkich audytów i zarządzanie właścicielami audytów'),
-        ('audits', 'Przeglądający audyty', 'Przeglądanie wszystkich audytów bez możliwości edycji'),
-        ('audits', 'Właściciel audytów', 'Dostęp do wszystkich audytów, wypełnianie danych i zmiany statusów'),
-        ('audits', 'Menedżer audytów', 'Dostęp do wszystkich audytów i wypełnianie danych bez zmiany statusów'),
-        
         # DEKLARACJE ZGODNOŚCI
         ('compliance', 'Administrator deklaracji zgodności', 'Przeglądanie wszystkich deklaracji zgodności i zmiana ich właścicieli'),
         ('compliance', 'Właściciel deklaracji zgodności', 'Pełne uprawnienia do tworzenia, edycji i zarządzania cyklem życia deklaracji zgodności'),

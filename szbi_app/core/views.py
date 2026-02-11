@@ -90,8 +90,17 @@ def get_or_create_organization():
 @login_required
 def dashboard(request):
     """Główny dashboard po zalogowaniu"""
+    # Pobierz imię pracownika jeśli istnieje
+    display_name = request.user.username
+    try:
+        if hasattr(request.user, 'employee'):
+            display_name = request.user.employee.first_name
+    except Exception:
+        pass
+    
     context = {
         'is_admin': is_admin(request.user),
+        'display_name': display_name,
     }
     return render(request, 'core/dashboard.html', context)
 

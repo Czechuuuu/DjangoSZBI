@@ -3,29 +3,9 @@ Predefiniowane uprawnienia w systemie SZBI.
 Te uprawnienia są ładowane do bazy danych przez migrację.
 """
 
+
 PERMISSIONS = [
-    # ============== AUDYTY ==============
-    {
-        'category': 'audits',
-        'name': 'Administrator audytów',
-        'description': 'Przeglądanie wszystkich audytów i zarządzanie właścicielami audytów'
-    },
-    {
-        'category': 'audits',
-        'name': 'Przeglądający audyty',
-        'description': 'Przeglądanie wszystkich audytów bez możliwości edycji'
-    },
-    {
-        'category': 'audits',
-        'name': 'Właściciel audytów',
-        'description': 'Dostęp do wszystkich audytów, wypełnianie danych i zmiany statusów'
-    },
-    {
-        'category': 'audits',
-        'name': 'Menedżer audytów',
-        'description': 'Dostęp do wszystkich audytów i wypełnianie danych bez zmiany statusów'
-    },
-    
+
     # ============== DEKLARACJE ZGODNOŚCI ==============
     {
         'category': 'compliance',
@@ -137,7 +117,6 @@ PERMISSIONS = [
 
 # Słownik kategorii do wyświetlania
 CATEGORY_LABELS = {
-    'audits': 'Audyty',
     'compliance': 'Deklaracje zgodności',
     'documents': 'Dokumenty',
     'activity_log': 'Dziennik zdarzeń',

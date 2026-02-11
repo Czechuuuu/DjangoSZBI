@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Edytuj kategorię{% else %}Nowa kategoria{% endif %} - SZBI{% endblock %}
+
+{% block content %}
+<h2>{% if object %}Edytuj kategorię: {{ object.name }}{% else %}Dodaj nową kategorię aktywów{% endif %}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <p>
+        <label for="{{ form.code.id_for_label }}">Kod kategorii*</label><br>
+        {{ form.code }}
+        {% if form.code.help_text %}<small>{{ form.code.help_text }}</small>{% endif %}
+        {% if form.code.errors %}<br><span style="color: red;">{{ form.code.errors }}</span>{% endif %}
+    </p>
+    
+    <p>
+        <label for="{{ form.name.id_for_label }}">Nazwa kategorii*</label><br>
+        {{ form.name }}
+        {% if form.name.errors %}<br><span style="color: red;">{{ form.name.errors }}</span>{% endif %}
+    </p>
+    
+    <p>
+        <label for="{{ form.description.id_for_label }}">Opis</label><br>
+        {{ form.description }}
+    </p>
+    
+    <p>
+        <label for="{{ form.parent.id_for_label }}">Kategoria nadrzędna</label><br>
+        {{ form.parent }}
+        <small>Opcjonalnie - dla tworzenia hierarchii kategorii</small>
+    </p>
+    
+    <p>
+        <button type="submit">{% if object %}Zapisz zmiany{% else %}Utwórz kategorię{% endif %}</button>
+        <a href="{% url 'assets:category_list' %}">Anuluj</a>
+    </p>
+</form>
+
+{% endblock %}

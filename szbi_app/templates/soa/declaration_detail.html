@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}{{ declaration.designation }} - SZBI{% endblock %}
+
+{% block content %}
+<h2>{{ declaration.designation }} - {{ declaration.name }}</h2>
+
+<p>
+    <a href="{% url 'soa:list' %}">← Powrót do listy</a> |
+    <a href="{% url 'soa:update' declaration.pk %}">Edytuj</a> |
+    <a href="{% url 'soa:delete' declaration.pk %}" style="color: red;">Usuń</a>
+</p>
+
+<h3>Informacje podstawowe</h3>
+<table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+        <th>Oznaczenie</th>
+        <td>{{ declaration.designation }}</td>
+    </tr>
+    <tr>
+        <th>Nazwa</th>
+        <td>{{ declaration.name }}</td>
+    </tr>
+    <tr>
+        <th>Wersja</th>
+        <td>{{ declaration.version }}</td>
+    </tr>
+    <tr>
+        <th>Status</th>
+        <td>
+            {{ declaration.get_status_display }}
+            <!-- Zmiana statusu -->
+            <form method="post" action="{% url 'soa:change_status' declaration.pk %}" style="display: inline;">
+                {% csrf_token %}
+                {{ status_form.new_status }}
+                <button type="submit">Zmień</button>
+            </form>
+        </td>
+    </tr>
+    <tr>
+        <th>Opis</th>
+        <td>{{ declaration.description|default:"-"|linebreaks }}</td>
+    </tr>
+    <tr>
+        <th>Właściciel</th>
+        <td>{{ declaration.owner.username }}</td>
+    </tr>
+    <tr>
+        <th>Data obowiązywania</th>
+        <td>{{ declaration.effective_date|default:"-" }}</td>
+    </tr>
+    <tr>
+        <th>Data utworzenia</th>
+        <td>{{ declaration.created_at }}</td>
+    </tr>
+    <tr>
+        <th>Ostatnia modyfikacja</th>
+        <td>{{ declaration.updated_at }}</td>
+    </tr>
+</table>
+
+<h3>Pozycje Deklaracji Stosowania</h3>
+<p>
+    <a href="{% url 'soa:entry_add' declaration.pk %}">+ Dodaj pozycję</a>
+</p>
+
+{% if entries %}
+<p>
+    <strong>Łącznie pozycji:</strong> {{ entries|length }} |
+    <strong>Stosowane:</strong> {{ declaration.get_applicable_count }}
+</p>
+
+{% for domain_code, domain_data in entries_by_domain.items %}
+<h4>{% if domain_data.domain %}{{ domain_data.domain.code }} - {{ domain_data.domain.name }}{% else %}Inne{% endif %}</h4>
+<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Wymaganie</th>
+            <th>Stosowanie</th>
+            <th>Osoba odpowiedzialna</th>
+            <th>Dokumenty</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in domain_data.entries %}
+        <tr>
+            <td>{{ entry.requirement.iso_id }}</td>
+            <td>
+                <strong>{{ entry.requirement.name }}</strong>
+                {% if entry.justification %}
+                <br><small><em>Uzasadnienie:</em> {{ entry.justification|truncatewords:15 }}</small>
+                {% endif %}
+            </td>
+            <td>{{ entry.get_applicability_display }}</td>
+            <td>
+                {% if entry.responsible_person %}
+                    {{ entry.responsible_person.first_name }} {{ entry.responsible_person.last_name }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                {% for doc in entry.related_documents.all %}
+                    <a href="{% url 'documents:detail' doc.pk %}">{{ doc.designation }}</a>{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                    -
+                {% endfor %}
+            </td>
+            <td>
+                <a href="{% url 'soa:entry_edit' declaration.pk entry.pk %}">Edytuj</a> |
+                <a href="{% url 'soa:entry_delete' declaration.pk entry.pk %}" style="color: red;">Usuń</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endfor %}
+
+{% else %}
+<p>Brak pozycji w tej deklaracji. <a href="{% url 'soa:entry_add' declaration.pk %}">Dodaj pierwszą pozycję</a>.</p>
+{% endif %}
+
+<h3>Historia zmian</h3>
+{% if logs %}
+<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Użytkownik</th>
+            <th>Akcja</th>
+            <th>Opis</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.timestamp }}</td>
+            <td>{{ log.user|default:"-" }}</td>
+            <td>{{ log.get_action_display }}</td>
+            <td>{{ log.description }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Brak wpisów w historii.</p>
+{% endif %}
+
+{% endblock %}

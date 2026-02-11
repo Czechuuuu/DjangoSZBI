@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Rejestr aktywów - SZBI{% endblock %}
+
+{% block content %}
+<h2>Rejestr aktywów</h2>
+
+<p>
+    <a href="{% url 'assets:create' %}">+ Dodaj nowe aktywo</a> |
+    <a href="{% url 'assets:category_list' %}">Zarządzaj kategoriami</a>
+</p>
+
+<!-- Filtry -->
+<form method="get" style="margin-bottom: 20px;">
+    <fieldset>
+        <legend>Filtry</legend>
+        <label>Kategoria:
+            <select name="category">
+                <option value="">-- Wszystkie --</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if current_category == cat.id|stringformat:"i" %}selected{% endif %}>
+                    {{ cat }}
+                </option>
+                {% endfor %}
+            </select>
+        </label>
+        
+        <label>Status:
+            <select name="status">
+                <option value="">-- Wszystkie --</option>
+                {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </label>
+        
+        <label>Krytyczność:
+            <select name="criticality">
+                <option value="">-- Wszystkie --</option>
+                {% for value, label in criticality_choices %}
+                <option value="{{ value }}" {% if current_criticality == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </label>
+        
+        <label>Szukaj:
+            <input type="text" name="q" value="{{ current_search }}" placeholder="Oznaczenie, nazwa, numer...">
+        </label>
+        
+        <button type="submit">Filtruj</button>
+        <a href="{% url 'assets:list' %}">Wyczyść</a>
+    </fieldset>
+</form>
+
+{% if assets %}
+<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Oznaczenie</th>
+            <th>Nazwa</th>
+            <th>Kategoria</th>
+            <th>Status</th>
+            <th>Krytyczność</th>
+            <th>Właściciel</th>
+            <th>Dział</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for asset in assets %}
+        <tr>
+            <td><a href="{% url 'assets:detail' asset.pk %}">{{ asset.designation }}</a></td>
+            <td>{{ asset.name }}</td>
+            <td>{{ asset.category.name }}</td>
+            <td>{{ asset.get_status_display }}</td>
+            <td>{{ asset.get_criticality_display }}</td>
+            <td>{{ asset.owner.first_name }} {{ asset.owner.last_name }}</td>
+            <td>{{ asset.department|default:"-" }}</td>
+            <td>
+                <a href="{% url 'assets:detail' asset.pk %}">Szczegóły</a> |
+                <a href="{% url 'assets:update' asset.pk %}">Edytuj</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Brak aktywów do wyświetlenia.</p>
+{% endif %}
+
+{% endblock %}

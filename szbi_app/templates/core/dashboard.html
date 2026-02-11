@@ -5,7 +5,7 @@
 {% block content %}
 <h2>Panel główny</h2>
 
-<p>Witaj, <strong>{{ user.username }}</strong>!</p>
+<p>Witaj, <strong>{{ display_name }}</strong>! Miłego dnia pracy.</p>
 
 {% if is_admin %}
 <h3>Administracja systemem</h3>
@@ -29,14 +29,5 @@
         <a href="{% url 'core:activity_log_list' %}">Przejdź →</a>
     </li>
 </ul>
-{% else %}
-<p>Nie masz uprawnień administratora. Skontaktuj się z administratorem systemu.</p>
 {% endif %}
-
-<hr>
-
-<h3>Szybki dostęp</h3>
-<ul>
-    <li><a href="/documents/">Dokumenty</a></li>
-</ul>
 {% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Usuń incydent - SZBI{% endblock %}
+
+{% block content %}
+<h2>Usuwanie incydentu</h2>
+
+<p>Czy na pewno chcesz usunąć incydent <strong>#{{ object.pk }}: {{ object.title }}</strong>?</p>
+
+<p style="color: red;">Ta operacja usunie również wszystkie notatki i historię zmian. Jest nieodwracalna!</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" style="color: red;">Tak, usuń</button>
+    <a href="{% url 'incidents:detail' object.pk %}">Anuluj</a>
+</form>
+{% endblock %}
