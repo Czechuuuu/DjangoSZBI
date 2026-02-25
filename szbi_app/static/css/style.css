@@ -501,6 +501,20 @@ td a.btn + a.btn {
     margin-left: 0.2rem;
 }
 
+.action-group {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.btn-icon {
+    padding: 0.3rem 0.5rem;
+    min-width: unset;
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
 .link-danger {
     color: var(--color-danger);
 }
@@ -1069,6 +1083,176 @@ ul.tree-list ul {
     border-radius: var(--radius-sm);
     padding: 0.75rem 1rem;
     margin-bottom: 1rem;
+    color: var(--color-danger);
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.35rem;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 0.25rem;
+}
+
+.password-policy-hint {
+    background: var(--color-info-bg);
+    border: 1px solid var(--color-info-border);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.password-policy-hint h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.95rem;
+    color: #155e75;
+}
+
+.password-policy-hint ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.password-policy-hint li {
+    font-size: 0.88rem;
+    color: #155e75;
+    margin-bottom: 0.25rem;
+    line-height: 1.5;
+}
+
+.password-strength-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.password-strength-bar {
+    flex: 1;
+    max-width: 300px;
+    height: 6px;
+    background: var(--color-border);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.password-strength-fill {
+    height: 100%;
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.password-strength-fill.strength-weak {
+    background: var(--color-danger);
+}
+
+.password-strength-fill.strength-fair {
+    background: var(--color-warning);
+}
+
+.password-strength-fill.strength-good {
+    background: #22c55e;
+}
+
+.password-strength-fill.strength-strong {
+    background: var(--color-success);
+}
+
+.password-strength-text {
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.password-strength-text.strength-weak {
+    color: var(--color-danger);
+}
+
+.password-strength-text.strength-fair {
+    color: var(--color-warning);
+}
+
+.password-strength-text.strength-good {
+    color: #22c55e;
+}
+
+.password-strength-text.strength-strong {
+    color: var(--color-success);
+}
+
+.password-match-indicator {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-top: 0.35rem;
+    min-height: 1.2em;
+}
+
+.password-match-indicator.match-ok {
+    color: var(--color-success);
+}
+
+.password-match-indicator.match-fail {
+    color: var(--color-danger);
+}
+
+.password-tips {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-top: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .password-tips {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tip-card {
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    border: 1px solid;
+}
+
+.tip-card h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+}
+
+.tip-card ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.tip-card li {
+    font-size: 0.88rem;
+    margin-bottom: 0.3rem;
+    line-height: 1.5;
+}
+
+.tip-good {
+    background: var(--color-success-bg);
+    border-color: var(--color-success-border);
+}
+
+.tip-good h4 {
+    color: var(--color-success);
+}
+
+.tip-bad {
+    background: var(--color-danger-bg);
+    border-color: var(--color-danger-border);
+}
+
+.tip-bad h4 {
     color: var(--color-danger);
 }
 

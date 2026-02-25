@@ -86,21 +86,47 @@ DATABASES = {
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+# Password validation — zgodne z rekomendacjami CERT Polska
+# https://cert.pl/posts/2022/01/rekomendacje-techniczne-systemow-uwierzytelniania/
+#
+# Zasady CERT PL:
+# - Argon2 jako algorytm hashujący (najwyższy priorytet)
+# - Minimalna długość hasła: 14 znaków
+# - Pozwalanie na hasła do 128 znaków
+# - Sprawdzanie na polskiej liście słabych haseł CERT PL
+# - Sprawdzanie przewidywalnych członów (nazwa firmy, systemu, itp.)
+# - NIE wymuszanie okresowej zmiany haseł
+# - NIE wymaganie znaków specjalnych, cyfr, wielkich liter
+# - Podawanie dokładnego powodu odrzucenia hasła
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.ScryptPasswordHasher',
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {
+        'NAME': 'core.validators.CERTMinimumLengthValidator',
+        'OPTIONS': {'min_length': 14},
+    },
+    {
+        'NAME': 'core.validators.CERTMaximumLengthValidator',
+        'OPTIONS': {'max_length': 128},
+    },
+    {
+        'NAME': 'core.validators.CERTPolishWeakPasswordValidator',
+    },
+    {
+        'NAME': 'core.validators.CERTPredictablePatternValidator',
+    },
+    {
+        'NAME': 'core.validators.CERTNoSequentialValidator',
+    },
+    {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -134,3 +160,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Bezpieczeństwo sesji
+SESSION_COOKIE_AGE = 3600  # Sesja wygasa po 1 godzinie
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'

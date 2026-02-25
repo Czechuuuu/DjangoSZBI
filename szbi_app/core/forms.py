@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 from .models import Organization, Department, Position, Permission, PermissionGroup, Employee, EmployeePermissionGroup
 
 
@@ -222,6 +223,135 @@ class EmployeeForm(forms.ModelForm):
         if password and password != password_confirm:
             self.add_error('password_confirm', 'Hasła nie są zgodne.')
         
+        # Walidacja hasła zgodnie z polityką CERT PL
+        if password:
+            user = None
+            if self.instance and self.instance.pk and hasattr(self.instance, 'user'):
+                user = self.instance.user
+            else:
+                # Tworzymy tymczasowy obiekt użytkownika do walidacji
+                user = User(
+                    username=cleaned_data.get('username', ''),
+                    first_name=cleaned_data.get('first_name', ''),
+                    last_name=cleaned_data.get('last_name', ''),
+                )
+            try:
+                validate_password(password, user=user)
+            except forms.ValidationError as e:
+                self.add_error('password', e)
+        
         return cleaned_data
+
+
+class PasswordChangeForm(forms.Form):
+    """
+    Formularz zmiany hasła zgodny z rekomendacjami CERT Polska.
+    NIE wymaga podania starego hasła przez administratora.
+    """
+    old_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'autocomplete': 'current-password',
+            'class': 'password-input',
+        }),
+        label="Aktualne hasło",
+    )
+    new_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'autocomplete': 'new-password',
+            'class': 'password-input',
+            'id': 'id_new_password',
+        }),
+        label="Nowe hasło",
+        help_text="Minimum 14 znaków. Najlepiej użyj pełnego zdania lub kilku niepowiązanych słów.",
+    )
+    new_password_confirm = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'autocomplete': 'new-password',
+            'class': 'password-input',
+        }),
+        label="Powtórz nowe hasło",
+    )
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def clean_old_password(self):
+        old_password = self.cleaned_data.get('old_password')
+        if self.user and not self.user.check_password(old_password):
+            raise forms.ValidationError("Podane aktualne hasło jest nieprawidłowe.")
+        return old_password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get('new_password')
+        new_password_confirm = cleaned_data.get('new_password_confirm')
+
+        if new_password and new_password_confirm:
+            if new_password != new_password_confirm:
+                self.add_error('new_password_confirm', 'Nowe hasła nie są zgodne.')
+
+            # Walidacja zgodnie z polityką CERT PL
+            if new_password and self.user:
+                try:
+                    validate_password(new_password, user=self.user)
+                except forms.ValidationError as e:
+                    self.add_error('new_password', e)
+
+        return cleaned_data
+
+    def save(self):
+        self.user.set_password(self.cleaned_data['new_password'])
+        self.user.save()
+        return self.user
+
+
+class AdminPasswordResetForm(forms.Form):
+    """
+    Formularz resetowania hasła przez administratora.
+    Zgodny z CERT PL — wymuszenie zmiany hasła przy podejrzeniu kompromitacji.
+    """
+    new_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'autocomplete': 'new-password',
+            'class': 'password-input',
+            'id': 'id_new_password',
+        }),
+        label="Nowe hasło",
+        help_text="Minimum 14 znaków.",
+    )
+    new_password_confirm = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'autocomplete': 'new-password',
+            'class': 'password-input',
+        }),
+        label="Powtórz nowe hasło",
+    )
+
+    def __init__(self, *args, target_user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.target_user = target_user
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get('new_password')
+        new_password_confirm = cleaned_data.get('new_password_confirm')
+
+        if new_password and new_password_confirm:
+            if new_password != new_password_confirm:
+                self.add_error('new_password_confirm', 'Hasła nie są zgodne.')
+            
+            if new_password and self.target_user:
+                try:
+                    validate_password(new_password, user=self.target_user)
+                except forms.ValidationError as e:
+                    self.add_error('new_password', e)
+
+        return cleaned_data
+
+    def save(self):
+        self.target_user.set_password(self.cleaned_data['new_password'])
+        self.target_user.save()
+        return self.target_user
 
 

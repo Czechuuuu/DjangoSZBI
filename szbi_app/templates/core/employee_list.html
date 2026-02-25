@@ -36,13 +36,15 @@
             <td>{{ employee.user.username }}</td>
             <td>{{ employee.department.name|default:"-" }}</td>
             <td>{{ employee.get_positions_display|default:"-" }}</td>
-            <td>{{ employee.position.name|default:"-" }}</td>
             <td>{% if employee.is_active %}Aktywny{% else %}Nieaktywny{% endif %}</td>
             <td>{% if employee.user.is_staff %}Tak{% else %}Nie{% endif %}</td>
             <td>
-                <a href="{% url 'core:employee_permissions' employee.pk %}" class="btn btn-outline btn-sm">Uprawnienia</a>
-                <a href="{% url 'core:employee_update' employee.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
-                <a href="{% url 'core:employee_delete' employee.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
+                <div class="action-group">
+                    <a href="{% url 'core:employee_permissions' employee.pk %}" class="btn btn-outline btn-sm">Uprawnienia</a>
+                    <a href="{% url 'core:employee_update' employee.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
+                    <a href="{% url 'core:admin_password_reset' employee.pk %}" class="btn btn-outline btn-sm" title="Resetuj hasło">Resetuj hasło</a>
+                    <a href="{% url 'core:employee_delete' employee.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
+                </div>
             </td>
         </tr>
         {% endfor %}

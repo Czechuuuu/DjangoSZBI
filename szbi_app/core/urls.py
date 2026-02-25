@@ -42,4 +42,9 @@ urlpatterns = [
     
     # Dziennik zdarzeń
     path('dziennik/', views.activity_log_list, name='activity_log_list'),
+    
+    # Zarządzanie hasłami (CERT Polska)
+    path('haslo/zmien/', views.password_change, name='password_change'),
+    path('haslo/polityka/', views.password_policy, name='password_policy'),
+    path('pracownicy/<int:pk>/reset-hasla/', views.admin_password_reset, name='admin_password_reset'),
 ]

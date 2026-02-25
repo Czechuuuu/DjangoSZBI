@@ -26,6 +26,7 @@
                 <a href="/admin/">Django Admin</a>
             {% endif %}
             <span>Zalogowany jako: <strong>{{ user.username }}</strong></span>
+            <a href="{% url 'core:password_change' %}" class="btn btn-sm btn-outline" style="margin-left: 0.5rem;">Zmień hasło</a>
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
                 <button type="submit">Wyloguj się</button>

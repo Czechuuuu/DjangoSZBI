@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.urls import reverse
 from django.core.paginator import Paginator
@@ -7,7 +8,7 @@ from django.db.models import Q
 from django.db import models as db_models
 
 from .models import Organization, Department, Position, Permission, PermissionGroup, PositionPermission, DepartmentPermission, Employee, ActivityLog, EmployeePermissionGroup
-from .forms import OrganizationForm, DepartmentForm, PositionForm, PermissionForm, PermissionGroupForm, EmployeeForm
+from .forms import OrganizationForm, DepartmentForm, PositionForm, PermissionForm, PermissionGroupForm, EmployeeForm, PasswordChangeForm, AdminPasswordResetForm
 
 
 def get_related_objects(obj):
@@ -828,3 +829,68 @@ def log_activity(request, action, category, obj, description, details=None):
         details=details,
         request=request
     )
+
+
+# =============================================
+# ZARZĄDZANIE HASŁAMI (zgodne z CERT Polska)
+# =============================================
+
+@login_required
+def password_change(request):
+    """Zmiana hasła przez zalogowanego użytkownika."""
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.POST, user=request.user)
+        if form.is_valid():
+            form.save()
+            # Utrzymaj sesję po zmianie hasła
+            update_session_auth_hash(request, request.user)
+            messages.success(request, 'Hasło zostało zmienione pomyślnie.')
+            
+            log_activity(
+                request, 'change', 'auth',
+                obj=request.user,
+                description=f'Użytkownik {request.user.username} zmienił swoje hasło.'
+            )
+            
+            return redirect('core:dashboard')
+    else:
+        form = PasswordChangeForm(user=request.user)
+    
+    return render(request, 'core/password_change.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_password_reset(request, pk):
+    """Reset hasła pracownika przez administratora (CERT PL: przy podejrzeniu kompromitacji)."""
+    employee = get_object_or_404(Employee, pk=pk)
+    target_user = employee.user
+    
+    if request.method == 'POST':
+        form = AdminPasswordResetForm(request.POST, target_user=target_user)
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request, 
+                f'Hasło pracownika {employee.first_name} {employee.last_name} zostało zresetowane.'
+            )
+            
+            log_activity(
+                request, 'change', 'auth',
+                obj=target_user,
+                description=f'Administrator {request.user.username} zresetował hasło użytkownika {target_user.username}.'
+            )
+            
+            return redirect('core:employee_list')
+    else:
+        form = AdminPasswordResetForm(target_user=target_user)
+    
+    return render(request, 'core/admin_password_reset.html', {
+        'form': form,
+        'employee': employee,
+    })
+
+
+def password_policy(request):
+    """Strona informacyjna o polityce haseł (CERT PL)."""
+    return render(request, 'core/password_policy.html')
