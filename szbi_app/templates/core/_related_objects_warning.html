@@ -1,11 +1,6 @@
-{% comment %}
-    Fragment szablonu wyświetlający ostrzeżenia o powiązanych obiektach.
-    Wymaga zmiennych kontekstu: related (dict), blocked (bool)
-{% endcomment %}
-
 {% if related.protected %}
-<div style="border: 2px solid #dc3545; background: #f8d7da; padding: 15px; margin: 15px 0; border-radius: 5px;">
-    <strong style="color: #dc3545;">⛔ Usunięcie zablokowane!</strong>
+<div class="alert alert-danger">
+    <strong>⛔ Usunięcie zablokowane!</strong>
     <p>Nie można usunąć tego elementu, ponieważ jest używany przez:</p>
     <ul>
         {% for item in related.protected %}
@@ -17,8 +12,8 @@
 {% endif %}
 
 {% if related.cascade %}
-<div style="border: 2px solid #ffc107; background: #fff3cd; padding: 15px; margin: 15px 0; border-radius: 5px;">
-    <strong style="color: #856404;">⚠️ Uwaga — kaskadowe usunięcie!</strong>
+<div class="alert alert-warning">
+    <strong>⚠️ Uwaga — kaskadowe usunięcie!</strong>
     <p>Następujące powiązane elementy zostaną <strong>trwale usunięte</strong>:</p>
     <ul>
         {% for item in related.cascade %}
@@ -29,8 +24,8 @@
 {% endif %}
 
 {% if related.set_null %}
-<div style="border: 2px solid #17a2b8; background: #d1ecf1; padding: 15px; margin: 15px 0; border-radius: 5px;">
-    <strong style="color: #0c5460;">ℹ️ Powiązania zostaną wyczyszczone:</strong>
+<div class="alert alert-info">
+    <strong>ℹ️ Powiązania zostaną wyczyszczone:</strong>
     <p>Następujące elementy stracą powiązanie (ale nie zostaną usunięte):</p>
     <ul>
         {% for item in related.set_null %}

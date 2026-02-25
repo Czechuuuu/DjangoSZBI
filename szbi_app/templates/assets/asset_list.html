@@ -5,13 +5,12 @@
 {% block content %}
 <h2>Rejestr aktywów</h2>
 
-<p>
-    <a href="{% url 'assets:create' %}">+ Dodaj nowe aktywo</a> |
-    <a href="{% url 'assets:category_list' %}">Zarządzaj kategoriami</a>
+<p class="actions">
+    <a href="{% url 'assets:create' %}" class="btn">+ Dodaj nowe aktywo</a>
+    <a href="{% url 'assets:category_list' %}" class="btn btn-outline">Zarządzaj kategoriami</a>
 </p>
 
-<!-- Filtry -->
-<form method="get" style="margin-bottom: 20px;">
+<form method="get" class="filter-form">
     <fieldset>
         <legend>Filtry</legend>
         <label>Kategoria:
@@ -52,12 +51,12 @@
         </label>
         
         <button type="submit">Filtruj</button>
-        <a href="{% url 'assets:list' %}">Wyczyść</a>
+        <a href="{% url 'assets:list' %}" class="btn btn-ghost">Wyczyść</a>
     </fieldset>
 </form>
 
 {% if assets %}
-<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+<table>
     <thead>
         <tr>
             <th>Oznaczenie</th>
@@ -81,8 +80,8 @@
             <td>{{ asset.owner.first_name }} {{ asset.owner.last_name }}</td>
             <td>{{ asset.department|default:"-" }}</td>
             <td>
-                <a href="{% url 'assets:detail' asset.pk %}">Szczegóły</a> |
-                <a href="{% url 'assets:update' asset.pk %}">Edytuj</a>
+                <a href="{% url 'assets:detail' asset.pk %}" class="btn btn-outline btn-sm">Szczegóły</a>
+                <a href="{% url 'assets:update' asset.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
             </td>
         </tr>
         {% endfor %}

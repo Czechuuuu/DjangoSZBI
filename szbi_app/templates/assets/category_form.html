@@ -12,13 +12,13 @@
         <label for="{{ form.code.id_for_label }}">Kod kategorii*</label><br>
         {{ form.code }}
         {% if form.code.help_text %}<small>{{ form.code.help_text }}</small>{% endif %}
-        {% if form.code.errors %}<br><span style="color: red;">{{ form.code.errors }}</span>{% endif %}
+        {% if form.code.errors %}<br><span class="field-error">{{ form.code.errors }}</span>{% endif %}
     </p>
     
     <p>
         <label for="{{ form.name.id_for_label }}">Nazwa kategorii*</label><br>
         {{ form.name }}
-        {% if form.name.errors %}<br><span style="color: red;">{{ form.name.errors }}</span>{% endif %}
+        {% if form.name.errors %}<br><span class="field-error">{{ form.name.errors }}</span>{% endif %}
     </p>
     
     <p>
@@ -34,7 +34,7 @@
     
     <p>
         <button type="submit">{% if object %}Zapisz zmiany{% else %}Utwórz kategorię{% endif %}</button>
-        <a href="{% url 'assets:category_list' %}">Anuluj</a>
+        <a href="{% url 'assets:category_list' %}" class="btn btn-outline">Anuluj</a>
     </p>
 </form>
 

@@ -7,12 +7,12 @@
 
 <h3>Grupy uprawnień</h3>
 <p>Grupy uprawnień definiują zestaw akcji, które można przypisać do stanowisk, działów lub pracowników.</p>
-<p>
-    <a href="{% url 'core:permission_group_create' %}">+ Dodaj grupę uprawnień</a>
+<p class="actions">
+    <a href="{% url 'core:permission_group_create' %}" class="btn">+ Dodaj grupę uprawnień</a>
 </p>
 
 {% if permission_groups %}
-<table border="1" cellpadding="10" cellspacing="0">
+<table>
     <thead>
         <tr>
             <th>Nazwa grupy</th>
@@ -28,17 +28,17 @@
             <td>{{ group.description|default:"-" }}</td>
             <td>{{ group.permissions.count }}</td>
             <td>
-                <a href="{% url 'core:permission_group_update' pk=group.pk %}">Edytuj</a> |
-                <a href="{% url 'core:permission_group_delete' pk=group.pk %}">Usuń</a>
+                <a href="{% url 'core:permission_group_update' pk=group.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
+                <a href="{% url 'core:permission_group_delete' pk=group.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% else %}
-<p><em>Brak grup uprawnień. <a href="{% url 'core:permission_group_create' %}">Dodaj pierwszą grupę</a>.</em></p>
+<p><em>Brak grup uprawnień. <a href="{% url 'core:permission_group_create' %}" class="btn">Dodaj pierwszą grupę</a>.</em></p>
 {% endif %}
 
 <hr>
-<p><a href="{% url 'core:dashboard' %}">← Powrót do panelu głównego</a></p>
+<p><a href="{% url 'core:dashboard' %}" class="btn btn-ghost">← Powrót do panelu głównego</a></p>
 {% endblock %}

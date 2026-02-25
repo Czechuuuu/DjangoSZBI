@@ -5,7 +5,7 @@
 {% block content %}
 <h1>{{ title }}</h1>
 
-<p><a href="{% url 'core:employee_list' %}">← Powrót do listy</a></p>
+<p><a href="{% url 'core:employee_list' %}" class="btn btn-ghost">← Powrót do listy</a></p>
 
 {% if messages %}
     {% for message in messages %}
@@ -115,7 +115,7 @@
     
     <p>
         <button type="submit">Zapisz</button>
-        <a href="{% url 'core:employee_list' %}">Anuluj</a>
+        <a href="{% url 'core:employee_list' %}" class="btn btn-outline">Anuluj</a>
     </p>
 </form>
 {% endblock %}

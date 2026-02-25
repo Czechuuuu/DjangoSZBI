@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import RedirectView
 from . import views
 
 app_name = 'core'
@@ -6,6 +7,7 @@ app_name = 'core'
 urlpatterns = [
     # Dashboard
     path('', views.dashboard, name='dashboard'),
+    path('access-denied/', RedirectView.as_view(url='/?access_denied=1'), name='dashboard_access_denied'),
     
     # Organizacja (jedna główna)
     path('organizacja/', views.organization_structure, name='organization_structure'),

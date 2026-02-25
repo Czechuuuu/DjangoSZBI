@@ -9,15 +9,7 @@
     {% csrf_token %}
     <table>
         <tr>
-            <td><label for="id_category"><strong>Kategoria:</strong></label></td>
-            <td>
-                {{ form.category }}
-                {% if form.category.errors %}<br><span class="field-error">{{ form.category.errors.0 }}</span>{% endif %}
-                <br><small>{{ form.category.help_text }}</small>
-            </td>
-        </tr>
-        <tr>
-            <td><label for="id_code"><strong>Kod domeny: *</strong></label></td>
+            <td><label for="id_code"><strong>Kod kategorii: *</strong></label></td>
             <td>
                 {{ form.code }}
                 {% if form.code.errors %}<br><span class="field-error">{{ form.code.errors.0 }}</span>{% endif %}
@@ -25,10 +17,18 @@
             </td>
         </tr>
         <tr>
-            <td><label for="id_name"><strong>Nazwa domeny: *</strong></label></td>
+            <td><label for="id_name"><strong>Nazwa kategorii: *</strong></label></td>
             <td>
                 {{ form.name }}
                 {% if form.name.errors %}<br><span class="field-error">{{ form.name.errors.0 }}</span>{% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td><label for="id_description"><strong>Opis:</strong></label></td>
+            <td>
+                {{ form.description }}
+                {% if form.description.errors %}<br><span class="field-error">{{ form.description.errors.0 }}</span>{% endif %}
+                <br><small>{{ form.description.help_text }}</small>
             </td>
         </tr>
     </table>

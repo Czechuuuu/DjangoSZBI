@@ -2,11 +2,50 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+class ISOCategory(models.Model):
+    """
+    Główna kategoria ISO 27001 Załącznik A.
+    Np. A 'Zabezpieczenia organizacyjne', B 'Zabezpieczenia dotyczące osób'
+    """
+    code = models.CharField(
+        max_length=5,
+        unique=True,
+        verbose_name="Kod kategorii",
+        help_text="Np. A, B, C, D"
+    )
+    name = models.CharField(
+        max_length=300,
+        verbose_name="Nazwa kategorii"
+    )
+    description = models.TextField(
+        blank=True,
+        verbose_name="Opis kategorii",
+        help_text="Opcjonalny opis głównej kategorii"
+    )
+
+    class Meta:
+        verbose_name = "Kategoria ISO"
+        verbose_name_plural = "Kategorie ISO"
+        ordering = ['code']
+
+    def __str__(self):
+        return f"{self.code} {self.name}"
+
+
 class ISODomain(models.Model):
     """
     Domena ISO 27001 Załącznik A.
     Np. A.5 'Polityki bezpieczeństwa informacji', A.6 'Organizacja bezpieczeństwa informacji'
     """
+    category = models.ForeignKey(
+        ISOCategory,
+        on_delete=models.CASCADE,
+        related_name='domains',
+        verbose_name="Kategoria",
+        null=True,
+        blank=True,
+        help_text="Główna kategoria nadrzędna (A, B, C, D)"
+    )
     code = models.CharField(
         max_length=10,
         unique=True,

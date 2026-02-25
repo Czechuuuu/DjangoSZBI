@@ -15,13 +15,13 @@
             <label for="{{ form.designation.id_for_label }}">Oznaczenie*</label><br>
             {{ form.designation }}
             {% if form.designation.help_text %}<small>{{ form.designation.help_text }}</small>{% endif %}
-            {% if form.designation.errors %}<br><span style="color: red;">{{ form.designation.errors }}</span>{% endif %}
+            {% if form.designation.errors %}<br><span class="field-error">{{ form.designation.errors }}</span>{% endif %}
         </p>
         
         <p>
             <label for="{{ form.name.id_for_label }}">Nazwa*</label><br>
             {{ form.name }}
-            {% if form.name.errors %}<br><span style="color: red;">{{ form.name.errors }}</span>{% endif %}
+            {% if form.name.errors %}<br><span class="field-error">{{ form.name.errors }}</span>{% endif %}
         </p>
         
         <p>
@@ -36,7 +36,7 @@
         <p>
             <label for="{{ form.category.id_for_label }}">Kategoria*</label><br>
             {{ form.category }}
-            {% if form.category.errors %}<br><span style="color: red;">{{ form.category.errors }}</span>{% endif %}
+            {% if form.category.errors %}<br><span class="field-error">{{ form.category.errors }}</span>{% endif %}
         </p>
         
         <p>
@@ -56,7 +56,7 @@
         <p>
             <label for="{{ form.owner.id_for_label }}">Właściciel*</label><br>
             {{ form.owner }}
-            {% if form.owner.errors %}<br><span style="color: red;">{{ form.owner.errors }}</span>{% endif %}
+            {% if form.owner.errors %}<br><span class="field-error">{{ form.owner.errors }}</span>{% endif %}
         </p>
         
         <p>
@@ -92,7 +92,7 @@
     
     <p>
         <button type="submit">{% if object %}Zapisz zmiany{% else %}Utwórz aktywo{% endif %}</button>
-        <a href="{% url 'assets:list' %}">Anuluj</a>
+        <a href="{% url 'assets:list' %}" class="btn btn-outline">Anuluj</a>
     </p>
 </form>
 

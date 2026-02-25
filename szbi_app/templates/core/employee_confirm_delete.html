@@ -22,15 +22,15 @@
 {% include "core/_related_objects_warning.html" %}
 
 {% if blocked %}
-    <p><a href="{% url 'core:employee_list' %}">← Powrót do listy pracowników</a></p>
+    <p><a href="{% url 'core:employee_list' %}" class="btn btn-ghost">← Powrót do listy pracowników</a></p>
 {% else %}
     <form method="post">
         {% csrf_token %}
-        <button type="submit" style="background: #dc3545; color: white; padding: 8px 16px; border: none; cursor: pointer;">Tak, usuń</button>
-        <a href="{% url 'core:employee_list' %}" style="margin-left: 10px;">Anuluj</a>
+        <button type="submit" class="btn-danger">Tak, usuń</button>
+        <a href="{% url 'core:employee_list' %}" class="btn btn-outline">Anuluj</a>
     </form>
 {% endif %}
 
 <hr>
-<p><a href="{% url 'core:employee_list' %}">← Powrót do listy pracowników</a></p>
+<p><a href="{% url 'core:employee_list' %}" class="btn btn-ghost">← Powrót do listy pracowników</a></p>
 {% endblock %}

@@ -1,10 +1,17 @@
 from django.contrib import admin
-from .models import ISODomain, ISOObjective, ISORequirement, ISOAttachment
+from .models import ISOCategory, ISODomain, ISOObjective, ISORequirement, ISOAttachment
+
+
+@admin.register(ISOCategory)
+class ISOCategoryAdmin(admin.ModelAdmin):
+    list_display = ['code', 'name']
+    ordering = ['code']
 
 
 @admin.register(ISODomain)
 class ISODomainAdmin(admin.ModelAdmin):
-    list_display = ['code', 'name']
+    list_display = ['code', 'name', 'category']
+    list_filter = ['category']
     ordering = ['code']
 
 

@@ -8,7 +8,7 @@
 <div>
     <p><strong>Czy na pewno chcesz cofnąć dostęp tej grupie?</strong></p>
     
-    <table border="1" cellpadding="10" cellspacing="0">
+    <table class="detail-table">
         <tr>
             <td><strong>Dokument:</strong></td>
             <td>[{{ document.designation }}] {{ document.title }}</td>
@@ -29,7 +29,7 @@
 <form method="post">
     {% csrf_token %}
     <button type="submit">Tak, cofnij dostęp</button>
-    <a href="{% url 'documents:detail' document.pk %}">Anuluj</a>
+    <a href="{% url 'documents:detail' document.pk %}" class="btn btn-outline">Anuluj</a>
 </form>
 
 {% endblock %}

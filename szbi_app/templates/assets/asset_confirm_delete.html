@@ -7,11 +7,11 @@
 
 <p>Czy na pewno chcesz usunąć aktywo <strong>{{ object.designation }} - {{ object.name }}</strong>?</p>
 
-<p style="color: red;">Ta operacja jest nieodwracalna!</p>
+<p class="alert-text-danger">Ta operacja jest nieodwracalna!</p>
 
 <form method="post">
     {% csrf_token %}
-    <button type="submit" style="color: red;">Tak, usuń</button>
-    <a href="{% url 'assets:detail' object.pk %}">Anuluj</a>
+    <button type="submit" class="btn-danger">Tak, usuń</button>
+    <a href="{% url 'assets:detail' object.pk %}" class="btn btn-outline">Anuluj</a>
 </form>
 {% endblock %}

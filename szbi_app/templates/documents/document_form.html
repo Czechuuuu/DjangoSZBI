@@ -3,11 +3,11 @@
 {% block content %}
 <h2>{% if object %}Edytuj dokument: {{ object.designation }}{% else %}Nowy dokument{% endif %}</h2>
 
-<div style="margin-bottom: 10px;">
+<div class="mb-2">
     {% if object %}
-        <a href="{% url 'documents:detail' object.pk %}">← Powrót do dokumentu</a>
+        <a href="{% url 'documents:detail' object.pk %}" class="btn btn-ghost">← Powrót do dokumentu</a>
     {% else %}
-        <a href="{% url 'documents:list' %}">← Powrót do listy</a>
+        <a href="{% url 'documents:list' %}" class="btn btn-ghost">← Powrót do listy</a>
     {% endif %}
 </div>
 
@@ -20,7 +20,7 @@
             <td>
                 {{ field }}
                 {% if field.help_text %}<br><small>{{ field.help_text }}</small>{% endif %}
-                {% if field.errors %}<br><span style="color: red;">{{ field.errors.0 }}</span>{% endif %}
+                {% if field.errors %}<br><span class="field-error">{{ field.errors.0 }}</span>{% endif %}
             </td>
         </tr>
         {% endfor %}

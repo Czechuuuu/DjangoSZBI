@@ -1,9 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SZBI - System Zarządzania Bezpieczeństwem Informacji{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <header>
@@ -19,10 +21,10 @@
             <a href="/incydenty/">Incydenty</a>
             <a href="/slownik/">Słownik ISO</a>
             {% if user.is_staff %}
-                | <a href="{% url 'core:activity_log_list' %}">Dziennik zdarzeń</a>
+                <span class="nav-separator">|</span>
+                <a href="{% url 'core:activity_log_list' %}">Dziennik zdarzeń</a>
                 <a href="/admin/">Django Admin</a>
             {% endif %}
-            | 
             <span>Zalogowany jako: <strong>{{ user.username }}</strong></span>
             <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
@@ -32,11 +34,9 @@
             <a href="{% url 'login' %}">Zaloguj się</a>
         {% endif %}
     </nav>
-
-    <hr>
     
     {% if messages %}
-    <div>
+    <div class="messages">
         {% for message in messages %}
         <p {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</p>
         {% endfor %}
@@ -48,10 +48,36 @@
         {% endblock %}
     </main>
     
-    <hr>
-    
     <footer>
         <p>&copy; 2025 SZBI App</p>
     </footer>
+
+    <div class="modal-backdrop" id="accessDeniedModal">
+        <div class="modal-box">
+            <span class="modal-icon">🔒</span>
+            <h3>Brak uprawnień</h3>
+            <p>Nie masz uprawnień do wykonania tej operacji. Skontaktuj się z administratorem systemu, aby uzyskać dostęp.</p>
+            <button class="btn" onclick="closeAccessDeniedModal()">Rozumiem</button>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('access_denied') === '1') {
+            document.getElementById('accessDeniedModal').classList.add('active');
+            params.delete('access_denied');
+            var newUrl = window.location.pathname;
+            if (params.toString()) newUrl += '?' + params.toString();
+            window.history.replaceState({}, '', newUrl);
+        }
+    })();
+    function closeAccessDeniedModal() {
+        document.getElementById('accessDeniedModal').classList.remove('active');
+    }
+    document.getElementById('accessDeniedModal').addEventListener('click', function(e) {
+        if (e.target === this) closeAccessDeniedModal();
+    });
+    </script>
 </body>
 </html>

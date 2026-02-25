@@ -5,13 +5,13 @@
 {% block content %}
 <h2>Kategorie aktywów</h2>
 
-<p>
-    <a href="{% url 'assets:category_create' %}">+ Dodaj nową kategorię</a> |
-    <a href="{% url 'assets:list' %}">Powrót do rejestru aktywów</a>
+<p class="actions">
+    <a href="{% url 'assets:category_create' %}" class="btn">+ Dodaj nową kategorię</a>
+    <a href="{% url 'assets:list' %}" class="btn btn-ghost">Powrót do rejestru aktywów</a>
 </p>
 
 {% if categories %}
-<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+<table>
     <thead>
         <tr>
             <th>Kod</th>
@@ -31,9 +31,9 @@
             <td>{{ category.description|truncatewords:10|default:"-" }}</td>
             <td>{{ category.assets_count }}</td>
             <td>
-                <a href="{% url 'assets:category_update' category.pk %}">Edytuj</a>
+                <a href="{% url 'assets:category_update' category.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
                 {% if category.assets_count == 0 %}
-                | <a href="{% url 'assets:category_delete' category.pk %}" style="color: red;">Usuń</a>
+                <a href="{% url 'assets:category_delete' category.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
                 {% endif %}
             </td>
         </tr>
@@ -41,7 +41,7 @@
     </tbody>
 </table>
 {% else %}
-<p>Brak kategorii. <a href="{% url 'assets:category_create' %}">Dodaj pierwszą kategorię</a>.</p>
+<p>Brak kategorii. <a href="{% url 'assets:category_create' %}" class="btn">Dodaj pierwszą kategorię</a>.</p>
 {% endif %}
 
 {% endblock %}

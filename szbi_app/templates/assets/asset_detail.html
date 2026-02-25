@@ -5,14 +5,14 @@
 {% block content %}
 <h2>{{ asset.designation }} - {{ asset.name }}</h2>
 
-<p>
-    <a href="{% url 'assets:list' %}">← Powrót do listy</a> |
-    <a href="{% url 'assets:update' asset.pk %}">Edytuj</a> |
-    <a href="{% url 'assets:delete' asset.pk %}" style="color: red;">Usuń</a>
+<p class="actions">
+    <a href="{% url 'assets:list' %}" class="btn btn-ghost">← Powrót do listy</a>
+    <a href="{% url 'assets:update' asset.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
+    <a href="{% url 'assets:delete' asset.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
 </p>
 
 <h3>Dane podstawowe</h3>
-<table border="1" cellspacing="0" cellpadding="5">
+<table class="detail-table">
     <tr>
         <th>Oznaczenie</th>
         <td>{{ asset.designation }}</td>
@@ -32,7 +32,7 @@
 </table>
 
 <h3>Status i klasyfikacja</h3>
-<table border="1" cellspacing="0" cellpadding="5">
+<table class="detail-table">
     <tr>
         <th>Status</th>
         <td>{{ asset.get_status_display }}</td>
@@ -44,7 +44,7 @@
 </table>
 
 <h3>Właściciel i lokalizacja</h3>
-<table border="1" cellspacing="0" cellpadding="5">
+<table class="detail-table">
     <tr>
         <th>Właściciel</th>
         <td>{{ asset.owner.first_name }} {{ asset.owner.last_name }}</td>
@@ -60,7 +60,7 @@
 </table>
 
 <h3>Daty i wartość</h3>
-<table border="1" cellspacing="0" cellpadding="5">
+<table class="detail-table">
     <tr>
         <th>Data nabycia</th>
         <td>{{ asset.acquisition_date|default:"-" }}</td>
@@ -76,7 +76,7 @@
 </table>
 
 <h3>Metadane</h3>
-<table border="1" cellspacing="0" cellpadding="5">
+<table class="detail-table">
     <tr>
         <th>Data utworzenia</th>
         <td>{{ asset.created_at }}</td>
@@ -93,7 +93,7 @@
 
 <h3>Historia zmian</h3>
 {% if logs %}
-<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+<table>
     <thead>
         <tr>
             <th>Data</th>

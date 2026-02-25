@@ -5,15 +5,13 @@
 {% block content %}
 <h2>[{{ object.designation }}] {{ object.title }}</h2>
 
-<div>
-    <a href="{% url 'documents:list' %}">← Powrót do listy</a>
-    |
-    <a href="{% url 'documents:update' object.pk %}">Edytuj</a>
+<div class="actions">
+    <a href="{% url 'documents:list' %}" class="btn btn-ghost">← Powrót do listy</a>
+    <a href="{% url 'documents:update' object.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
 </div>
 
-<!-- Informacje o dokumencie -->
 <h3>Informacje podstawowe</h3>
-<table border="1" cellpadding="15" cellspacing="0">
+<table class="detail-table">
     <tr>
         <th>Oznaczenie</th>
         <td><strong>{{ object.designation }}</strong></td>
@@ -50,7 +48,6 @@
     </tr>
 </table>
 
-<!-- Workflow -->
 <h3>Workflow — zmiana statusu</h3>
 {% if allowed_transitions %}
 <form method="post" action="{% url 'documents:workflow_transition' object.pk %}">
@@ -67,25 +64,24 @@
 <p><em>Brak dozwolonych przejść statusu z bieżącego stanu ({{ object.get_status_display }}).</em></p>
 {% endif %}
 
-<!-- Wersje dokumentu -->
 <h3>Wersje dokumentu</h3>
 
 <p>
-    <a href="{% url 'documents:add_version' object.pk %}">+ Dodaj nową wersję</a>
+    <a href="{% url 'documents:add_version' object.pk %}" class="btn">+ Dodaj nową wersję</a>
 </p>
 
 {% if current_version %}
 <p>
     <strong>Obowiązująca wersja:</strong> v{{ current_version.version_number }}
     (dodana {{ current_version.created_at|date:"Y-m-d H:i" }} przez {{ current_version.created_by.username }})
-    | <a href="{% url 'documents:download_version' object.pk current_version.pk %}">Pobierz plik</a>
+    <a href="{% url 'documents:download_version' object.pk current_version.pk %}" class="btn btn-outline btn-sm">Pobierz plik</a>
 </p>
 {% else %}
 <p><em>Brak oznaczonej wersji obowiązującej.</em></p>
 {% endif %}
 
 {% if versions %}
-<table border="1" cellpadding="8" cellspacing="0">
+<table class="detail-table">
     <thead>
         <tr>
             <th>Wersja</th>
@@ -98,14 +94,14 @@
     </thead>
     <tbody>
         {% for version in versions %}
-        <tr {% if version.is_current %}style="background-color: #e8f5e9;"{% endif %}>
+        <tr {% if version.is_current %}class="row-current"{% endif %}>
             <td>
                 <strong>v{{ version.version_number }}</strong>
                 {% if version.is_current %} ✓ obowiązująca{% endif %}
             </td>
             <td>
                 {% if version.file %}
-                <a href="{% url 'documents:download_version' object.pk version.pk %}">Pobierz</a>
+                <a href="{% url 'documents:download_version' object.pk version.pk %}" class="btn btn-outline btn-sm">Pobierz</a>
                 {% else %}
                 -
                 {% endif %}
@@ -115,7 +111,7 @@
             <td>{{ version.created_at|date:"Y-m-d H:i" }}</td>
             <td>
                 {% if not version.is_current %}
-                <form method="post" action="{% url 'documents:set_current_version' object.pk version.pk %}" style="display:inline;">
+                <form method="post" action="{% url 'documents:set_current_version' object.pk version.pk %}" class="inline-form">
                     {% csrf_token %}
                     <button type="submit" onclick="return confirm('Czy na pewno ustawić v{{ version.version_number }} jako obowiązującą?')">Ustaw jako obowiązującą</button>
                 </form>
@@ -131,7 +127,6 @@
 <p><em>Brak wersji dokumentu. Dodaj pierwszą wersję z plikiem.</em></p>
 {% endif %}
 
-<!-- Zapoznanie się -->
 <h3>Zapoznanie się z dokumentem</h3>
 
 {% if current_version %}
@@ -150,7 +145,7 @@
 {% endif %}
 
 {% if acknowledgements %}
-<table border="1" cellpadding="8" cellspacing="0">
+<table class="detail-table">
     <thead>
         <tr>
             <th>Użytkownik</th>
@@ -170,15 +165,14 @@
 </table>
 {% endif %}
 
-<!-- Dostęp do dokumentu -->
 <h3>Dostęp do dokumentu</h3>
 
 <p>
-    <a href="{% url 'documents:grant_access' object.pk %}">+ Nadaj dostęp grupie</a>
+    <a href="{% url 'documents:grant_access' object.pk %}" class="btn">+ Nadaj dostęp grupie</a>
 </p>
 
 {% if access_entries %}
-<table border="1" cellpadding="8" cellspacing="0">
+<table class="detail-table">
     <thead>
         <tr>
             <th>Grupa uprawnień</th>
@@ -196,7 +190,7 @@
             <td>{{ access.granted_by.username|default:"-" }}</td>
             <td>{{ access.granted_at|date:"Y-m-d H:i" }}</td>
             <td>
-                <a href="{% url 'documents:revoke_access' object.pk access.pk %}">Cofnij</a>
+                <a href="{% url 'documents:revoke_access' object.pk access.pk %}" class="btn btn-outline-danger btn-sm">Cofnij</a>
             </td>
         </tr>
         {% endfor %}
@@ -206,15 +200,14 @@
 <p><em>Brak nadanych dostępów.</em></p>
 {% endif %}
 
-<!-- Powiązane wymagania ISO -->
 <h3>Powiązane wymagania ISO</h3>
 
 <p>
-    <a href="{% url 'documents:add_iso_mapping' object.pk %}">+ Dodaj powiązanie z ISO</a>
+    <a href="{% url 'documents:add_iso_mapping' object.pk %}" class="btn">+ Dodaj powiązanie z ISO</a>
 </p>
 
 {% if iso_mappings %}
-<table border="1" cellpadding="10" cellspacing="0">
+<table>
     <thead>
         <tr>
             <th>ID ISO</th>
@@ -241,7 +234,7 @@
             <td>{{ mapping.get_mapping_type_display }}</td>
             <td>{{ mapping.section_reference|default:"-" }}</td>
             <td>
-                <a href="{% url 'documents:remove_iso_mapping' object.pk mapping.pk %}">Usuń</a>
+                <a href="{% url 'documents:remove_iso_mapping' object.pk mapping.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
             </td>
         </tr>
         {% endfor %}
@@ -251,10 +244,9 @@
 <p><em>Ten dokument nie jest jeszcze powiązany z żadnymi wymaganiami ISO.</em></p>
 {% endif %}
 
-<!-- Historia zmian -->
 <h3>Historia zmian (log)</h3>
 {% if logs %}
-<table border="1" cellpadding="8" cellspacing="0">
+<table class="detail-table">
     <thead>
         <tr>
             <th>Data</th>

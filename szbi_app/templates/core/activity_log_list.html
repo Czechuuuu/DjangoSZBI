@@ -7,7 +7,6 @@
 
 <p>Historia operacji wykonywanych w systemie.</p>
 
-<!-- Filtry -->
 <details>
     <summary>Filtry</summary>
     <form method="get">
@@ -48,12 +47,11 @@
         </p>
         <p>
             <button type="submit">Filtruj</button>
-            <a href="{% url 'core:activity_log_list' %}">Wyczyść filtry</a>
+            <a href="{% url 'core:activity_log_list' %}" class="btn btn-ghost">Wyczyść filtry</a>
         </p>
     </form>
 </details>
 
-<!-- Statystyki -->
 <p>
     <strong>Znaleziono:</strong> {{ page_obj.paginator.count }} zdarzeń
     {% if page_obj.paginator.num_pages > 1 %}
@@ -61,9 +59,8 @@
     {% endif %}
 </p>
 
-<!-- Tabela zdarzeń -->
 {% if logs %}
-<table border="1" cellpadding="8" cellspacing="0">
+<table>
     <thead>
         <tr>
             <th>Data i czas</th>
@@ -86,7 +83,7 @@
                 {% endif %}
             </td>
             <td>{{ log.get_action_display }}</td>
-            <td>{{ log.get_category_display }}</td>
+            <td><span class="category-badge cat-{{ log.category }}">{{ log.get_category_display }}</span></td>
             <td>
                 <strong>{{ log.object_repr }}</strong>
                 <br><small>{{ log.object_type }}</small>
@@ -97,19 +94,18 @@
     </tbody>
 </table>
 
-<!-- Paginacja -->
 {% if page_obj.paginator.num_pages > 1 %}
 <p>
     {% if page_obj.has_previous %}
-        <a href="?page=1{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Pierwsza</a>
-        <a href="?page={{ page_obj.previous_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Poprzednia</a>
+        <a href="?page=1{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-outline btn-sm">Pierwsza</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-outline btn-sm">Poprzednia</a>
     {% endif %}
     
     Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }}
     
     {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Następna</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Ostatnia</a>
+        <a href="?page={{ page_obj.next_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-outline btn-sm">Następna</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-outline btn-sm">Ostatnia</a>
     {% endif %}
 </p>
 {% endif %}
@@ -121,7 +117,7 @@
 <hr>
 
 <p>
-    <a href="{% url 'core:dashboard' %}">← Powrót do panelu głównego</a>
+    <a href="{% url 'core:dashboard' %}" class="btn btn-ghost">← Powrót do panelu głównego</a>
 </p>
 
 {% endblock %}

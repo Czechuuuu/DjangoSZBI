@@ -7,11 +7,11 @@
 
 <p>Czy na pewno chcesz usunąć incydent <strong>#{{ object.pk }}: {{ object.title }}</strong>?</p>
 
-<p style="color: red;">Ta operacja usunie również wszystkie notatki i historię zmian. Jest nieodwracalna!</p>
+<p class="alert-text-danger">Ta operacja usunie również wszystkie notatki i historię zmian. Jest nieodwracalna!</p>
 
 <form method="post">
     {% csrf_token %}
-    <button type="submit" style="color: red;">Tak, usuń</button>
-    <a href="{% url 'incidents:detail' object.pk %}">Anuluj</a>
+    <button type="submit" class="btn-danger">Tak, usuń</button>
+    <a href="{% url 'incidents:detail' object.pk %}" class="btn btn-outline">Anuluj</a>
 </form>
 {% endblock %}

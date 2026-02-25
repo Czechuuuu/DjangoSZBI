@@ -27,7 +27,7 @@
 <form method="post">
     {% csrf_token %}
     <button type="submit">Tak, usuń powiązanie</button>
-    <a href="{% url 'documents:detail' document.pk %}">Anuluj</a>
+    <a href="{% url 'documents:detail' document.pk %}" class="btn btn-outline">Anuluj</a>
 </form>
 
 {% endblock %}

@@ -5,14 +5,14 @@
 {% block content %}
 <h2>{{ declaration.designation }} - {{ declaration.name }}</h2>
 
-<p>
-    <a href="{% url 'soa:list' %}">← Powrót do listy</a> |
-    <a href="{% url 'soa:update' declaration.pk %}">Edytuj</a> |
-    <a href="{% url 'soa:delete' declaration.pk %}" style="color: red;">Usuń</a>
+<p class="actions">
+    <a href="{% url 'soa:list' %}" class="btn btn-ghost">← Powrót do listy</a>
+    <a href="{% url 'soa:update' declaration.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
+    <a href="{% url 'soa:delete' declaration.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
 </p>
 
 <h3>Informacje podstawowe</h3>
-<table border="1" cellspacing="0" cellpadding="5">
+<table class="detail-table">
     <tr>
         <th>Oznaczenie</th>
         <td>{{ declaration.designation }}</td>
@@ -29,8 +29,7 @@
         <th>Status</th>
         <td>
             {{ declaration.get_status_display }}
-            <!-- Zmiana statusu -->
-            <form method="post" action="{% url 'soa:change_status' declaration.pk %}" style="display: inline;">
+            <form method="post" action="{% url 'soa:change_status' declaration.pk %}" class="inline-form">
                 {% csrf_token %}
                 {{ status_form.new_status }}
                 <button type="submit">Zmień</button>
@@ -61,7 +60,7 @@
 
 <h3>Pozycje Deklaracji Stosowania</h3>
 <p>
-    <a href="{% url 'soa:entry_add' declaration.pk %}">+ Dodaj pozycję</a>
+    <a href="{% url 'soa:entry_add' declaration.pk %}" class="btn">+ Dodaj pozycję</a>
 </p>
 
 {% if entries %}
@@ -72,7 +71,7 @@
 
 {% for domain_code, domain_data in entries_by_domain.items %}
 <h4>{% if domain_data.domain %}{{ domain_data.domain.code }} - {{ domain_data.domain.name }}{% else %}Inne{% endif %}</h4>
-<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+<table>
     <thead>
         <tr>
             <th>ID</th>
@@ -109,8 +108,8 @@
                 {% endfor %}
             </td>
             <td>
-                <a href="{% url 'soa:entry_edit' declaration.pk entry.pk %}">Edytuj</a> |
-                <a href="{% url 'soa:entry_delete' declaration.pk entry.pk %}" style="color: red;">Usuń</a>
+                <a href="{% url 'soa:entry_edit' declaration.pk entry.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
+                <a href="{% url 'soa:entry_delete' declaration.pk entry.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
             </td>
         </tr>
         {% endfor %}
@@ -119,12 +118,12 @@
 {% endfor %}
 
 {% else %}
-<p>Brak pozycji w tej deklaracji. <a href="{% url 'soa:entry_add' declaration.pk %}">Dodaj pierwszą pozycję</a>.</p>
+<p>Brak pozycji w tej deklaracji. <a href="{% url 'soa:entry_add' declaration.pk %}" class="btn">Dodaj pierwszą pozycję</a>.</p>
 {% endif %}
 
 <h3>Historia zmian</h3>
 {% if logs %}
-<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+<table>
     <thead>
         <tr>
             <th>Data</th>

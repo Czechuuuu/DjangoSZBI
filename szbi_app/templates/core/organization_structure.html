@@ -9,95 +9,113 @@
 <p>{{ organization.description }}</p>
 {% endif %}
 
-<p>
-    <a href="{% url 'core:organization_edit' %}">Edytuj dane organizacji</a>
+<p class="actions">
+    <a href="{% url 'core:organization_edit' %}" class="btn btn-outline">Edytuj dane organizacji</a>
 </p>
 
 <hr>
 
 <h3>Struktura organizacyjna</h3>
 
-<p><a href="{% url 'core:department_create' %}">+ Dodaj dział</a></p>
+<p class="actions"><a href="{% url 'core:department_create' %}" class="btn">+ Dodaj dział</a></p>
 
 {% if departments %}
-<ul>
+<ul class="org-tree">
     {% for dept in departments %}
     <li>
-        <strong>{{ dept.name }}</strong>
-        {% if dept.description %}<br><small>{{ dept.description }}</small>{% endif %}
-        {% if dept.permission_assignments.exists %}
-        <br><small>Uprawnienia: 
-            {% for pa in dept.permission_assignments.all %}{{ pa.permission_group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
-        </small>
-        {% endif %}
-        <br>
-        <small>
-            <a href="{% url 'core:department_update' pk=dept.pk %}">Edytuj</a> |
-            <a href="{% url 'core:department_delete' pk=dept.pk %}">Usuń</a> |
-            <a href="{% url 'core:department_permissions' pk=dept.pk %}">Uprawnienia</a> |
-            <a href="{% url 'core:position_create_in_dept' dept_pk=dept.pk %}">+ Stanowisko</a>
-        </small>
+        <div class="org-node">
+            <div class="org-node-header">
+                <div>
+                    <strong>{{ dept.name }}</strong>
+                    {% if dept.description %}<div class="org-node-meta">{{ dept.description }}</div>{% endif %}
+                    {% if dept.permission_assignments.exists %}
+                    <span class="org-node-perms">
+                        {% for pa in dept.permission_assignments.all %}{{ pa.permission_group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    </span>
+                    {% endif %}
+                </div>
+                <small class="tree-actions">
+                    <a href="{% url 'core:department_update' pk=dept.pk %}">Edytuj</a>
+                    <a href="{% url 'core:department_delete' pk=dept.pk %}">Usuń</a>
+                    <a href="{% url 'core:department_permissions' pk=dept.pk %}">Uprawnienia</a>
+                    <a href="{% url 'core:position_create_in_dept' dept_pk=dept.pk %}">+ Stanowisko</a>
+                </small>
+            </div>
+        </div>
         
-        <!-- Stanowiska w dziale -->
         {% if dept.positions.exists %}
-        <ul>
+        <ul class="org-children">
             {% for pos in dept.positions.all %}
             <li>
-                {{ pos.name }}
-                {% if pos.description %}<br><small>{{ pos.description }}</small>{% endif %}
-                {% if pos.permission_assignments.exists %}
-                <br><small>Uprawnienia: 
-                    {% for pa in pos.permission_assignments.all %}{{ pa.permission_group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                </small>
-                {% endif %}
-                <br>
-                <small>
-                    <a href="{% url 'core:position_update' pk=pos.pk %}">Edytuj</a> |
-                    <a href="{% url 'core:position_delete' pk=pos.pk %}">Usuń</a> |
-                    <a href="{% url 'core:position_permissions' pk=pos.pk %}">Uprawnienia</a>
-                </small>
+                <div class="org-child-node">
+                    <div class="org-node-header">
+                        <div>
+                            <strong>{{ pos.name }}</strong>
+                            {% if pos.description %}<div class="org-node-meta">{{ pos.description }}</div>{% endif %}
+                            {% if pos.permission_assignments.exists %}
+                            <span class="org-node-perms">
+                                {% for pa in pos.permission_assignments.all %}{{ pa.permission_group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <small class="tree-actions">
+                            <a href="{% url 'core:position_update' pk=pos.pk %}">Edytuj</a>
+                            <a href="{% url 'core:position_delete' pk=pos.pk %}">Usuń</a>
+                            <a href="{% url 'core:position_permissions' pk=pos.pk %}">Uprawnienia</a>
+                        </small>
+                    </div>
+                </div>
             </li>
             {% endfor %}
         </ul>
         {% endif %}
         
-        <!-- Poddziały -->
         {% if dept.subdepartments.exists %}
-        <ul>
+        <ul class="org-children">
             {% for subdept in dept.subdepartments.all %}
             <li>
-                <strong>{{ subdept.name }}</strong>
-                {% if subdept.description %}<br><small>{{ subdept.description }}</small>{% endif %}
-                {% if subdept.permission_assignments.exists %}
-                <br><small>Uprawnienia: 
-                    {% for pa in subdept.permission_assignments.all %}{{ pa.permission_group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                </small>
-                {% endif %}
-                <br>
-                <small>
-                    <a href="{% url 'core:department_update' pk=subdept.pk %}">Edytuj</a> |
-                    <a href="{% url 'core:department_delete' pk=subdept.pk %}">Usuń</a> |
-                    <a href="{% url 'core:department_permissions' pk=subdept.pk %}">Uprawnienia</a> |
-                    <a href="{% url 'core:position_create_in_dept' dept_pk=subdept.pk %}">+ Stanowisko</a>
-                </small>
+                <div class="org-node">
+                    <div class="org-node-header">
+                        <div>
+                            <strong>{{ subdept.name }}</strong>
+                            {% if subdept.description %}<div class="org-node-meta">{{ subdept.description }}</div>{% endif %}
+                            {% if subdept.permission_assignments.exists %}
+                            <span class="org-node-perms">
+                                {% for pa in subdept.permission_assignments.all %}{{ pa.permission_group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <small class="tree-actions">
+                            <a href="{% url 'core:department_update' pk=subdept.pk %}">Edytuj</a>
+                            <a href="{% url 'core:department_delete' pk=subdept.pk %}">Usuń</a>
+                            <a href="{% url 'core:department_permissions' pk=subdept.pk %}">Uprawnienia</a>
+                            <a href="{% url 'core:position_create_in_dept' dept_pk=subdept.pk %}">+ Stanowisko</a>
+                        </small>
+                    </div>
+                </div>
                 
                 {% if subdept.positions.exists %}
-                <ul>
+                <ul class="org-sub-children">
                     {% for pos in subdept.positions.all %}
                     <li>
-                        {{ pos.name }}
-                        {% if pos.description %}<br><small>{{ pos.description }}</small>{% endif %}
-                        {% if pos.permission_assignments.exists %}
-                        <br><small>Uprawnienia: 
-                            {% for pa in pos.permission_assignments.all %}{{ pa.permission_group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
-                        </small>
-                        {% endif %}
-                        <br>
-                        <small>
-                            <a href="{% url 'core:position_update' pk=pos.pk %}">Edytuj</a> |
-                            <a href="{% url 'core:position_delete' pk=pos.pk %}">Usuń</a> |
-                            <a href="{% url 'core:position_permissions' pk=pos.pk %}">Uprawnienia</a>
-                        </small>
+                        <div class="org-child-node">
+                            <div class="org-node-header">
+                                <div>
+                                    <strong>{{ pos.name }}</strong>
+                                    {% if pos.description %}<div class="org-node-meta">{{ pos.description }}</div>{% endif %}
+                                    {% if pos.permission_assignments.exists %}
+                                    <span class="org-node-perms">
+                                        {% for pa in pos.permission_assignments.all %}{{ pa.permission_group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <small class="tree-actions">
+                                    <a href="{% url 'core:position_update' pk=pos.pk %}">Edytuj</a>
+                                    <a href="{% url 'core:position_delete' pk=pos.pk %}">Usuń</a>
+                                    <a href="{% url 'core:position_permissions' pk=pos.pk %}">Uprawnienia</a>
+                                </small>
+                            </div>
+                        </div>
                     </li>
                     {% endfor %}
                 </ul>
@@ -110,11 +128,11 @@
     {% endfor %}
 </ul>
 {% else %}
-<p>Brak działów. <a href="{% url 'core:department_create' %}">Dodaj pierwszy dział</a>.</p>
+<p>Brak działów. <a href="{% url 'core:department_create' %}" class="btn">Dodaj pierwszy dział</a>.</p>
 {% endif %}
 
 <hr>
 <p>
-    <a href="{% url 'core:dashboard' %}">← Powrót do panelu głównego</a>
+    <a href="{% url 'core:dashboard' %}" class="btn btn-ghost">← Powrót do panelu głównego</a>
 </p>
 {% endblock %}

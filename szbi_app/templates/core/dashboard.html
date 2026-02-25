@@ -11,23 +11,49 @@
 <h3>Administracja systemem</h3>
 <p>Wybierz obszar, którym chcesz zarządzać:</p>
 
-<ul>
+<ul class="dashboard-list">
     <li>
-        <strong>Organizacja</strong> - Zarządzaj strukturą organizacyjną, działami i stanowiskami.
-        <a href="{% url 'core:organization_structure' %}">Przejdź →</a>
+        <span><strong>Organizacja</strong> - Zarządzaj strukturą organizacyjną, działami i stanowiskami.</span>
+        <a href="{% url 'core:organization_structure' %}" class="btn btn-outline btn-sm">Przejdź →</a>
     </li>
     <li>
-        <strong>Pracownicy</strong> - Zarządzaj pracownikami i ich przypisaniem do działów.
-        <a href="{% url 'core:employee_list' %}">Przejdź →</a>
+        <span><strong>Pracownicy</strong> - Zarządzaj pracownikami i ich przypisaniem do działów.</span>
+        <a href="{% url 'core:employee_list' %}" class="btn btn-outline btn-sm">Przejdź →</a>
     </li>
     <li>
-        <strong>Uprawnienia</strong> - Zarządzaj grupami uprawnień i przypisuj je do stanowisk.
-        <a href="{% url 'core:permission_list' %}">Przejdź →</a>
+        <span><strong>Uprawnienia</strong> - Zarządzaj grupami uprawnień i przypisuj je do stanowisk.</span>
+        <a href="{% url 'core:permission_list' %}" class="btn btn-outline btn-sm">Przejdź →</a>
     </li>
     <li>
-        <strong>Dziennik zdarzeń</strong> - Przeglądaj historię zdarzeń i aktywności w systemie.
-        <a href="{% url 'core:activity_log_list' %}">Przejdź →</a>
+        <span><strong>Dziennik zdarzeń</strong> - Przeglądaj historię zdarzeń i aktywności w systemie.</span>
+        <a href="{% url 'core:activity_log_list' %}" class="btn btn-outline btn-sm">Przejdź →</a>
     </li>
 </ul>
 {% endif %}
+
+<h3>Moduły SZBI</h3>
+<p>Przejdź do wybranego modułu:</p>
+
+<ul class="dashboard-list">
+    <li>
+        <span><strong>Dokumenty</strong> - Zarządzaj dokumentami systemu bezpieczeństwa informacji.</span>
+        <a href="/documents/" class="btn btn-outline btn-sm">Przejdź →</a>
+    </li>
+    <li>
+        <span><strong>Rejestr aktywów</strong> - Przeglądaj i zarządzaj aktywami informacyjnymi.</span>
+        <a href="/aktywa/" class="btn btn-outline btn-sm">Przejdź →</a>
+    </li>
+    <li>
+        <span><strong>Deklaracje SoA</strong> - Deklaracje stosowania wymagań ISO 27001.</span>
+        <a href="/deklaracje/" class="btn btn-outline btn-sm">Przejdź →</a>
+    </li>
+    <li>
+        <span><strong>Incydenty bezpieczeństwa</strong> - Zgłaszaj i zarządzaj incydentami bezpieczeństwa.</span>
+        <a href="/incydenty/" class="btn btn-outline btn-sm">Przejdź →</a>
+    </li>
+    <li>
+        <span><strong>Słownik ISO</strong> - Wymagania standardów i przepisów ISO 27001.</span>
+        <a href="/slownik/" class="btn btn-outline btn-sm">Przejdź →</a>
+    </li>
+</ul>
 {% endblock %}

@@ -9,7 +9,7 @@
 
 <form method="post">
     {% csrf_token %}
-    <button type="submit" style="color: red;">Tak, usuń</button>
-    <a href="{% url 'soa:detail' declaration.pk %}">Anuluj</a>
+    <button type="submit" class="btn-danger">Tak, usuń</button>
+    <a href="{% url 'soa:detail' declaration.pk %}" class="btn btn-outline">Anuluj</a>
 </form>
 {% endblock %}

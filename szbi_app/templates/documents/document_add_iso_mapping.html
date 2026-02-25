@@ -44,7 +44,7 @@
             </td>
         </tr>
         <tr>
-            <td style="padding: 10px; vertical-align: top;">
+            <td>
                 <label for="id_notes"><strong>Uwagi:</strong></label>
             </td>
             <td>
@@ -58,7 +58,7 @@
     
     <p>
         <button type="submit">Dodaj powiązanie</button>
-        <a href="{% url 'documents:detail' document.pk %}">Anuluj</a>
+        <a href="{% url 'documents:detail' document.pk %}" class="btn btn-outline">Anuluj</a>
     </p>
 </form>
 

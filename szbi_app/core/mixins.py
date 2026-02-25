@@ -62,8 +62,7 @@ class SZBIPermissionRequiredMixin(LoginRequiredMixin):
             return self.handle_no_permission()
         
         if not self.has_szbi_permission():
-            messages.error(request, self.szbi_permission_denied_message)
-            return self.handle_permission_denied()
+            return redirect('core:dashboard_access_denied')
         
         return super().dispatch(request, *args, **kwargs)
     
@@ -108,8 +107,7 @@ class SZBIAllPermissionsRequiredMixin(LoginRequiredMixin):
             return self.handle_no_permission()
         
         if not self.has_all_szbi_permissions():
-            messages.error(request, self.szbi_permission_denied_message)
-            return self.handle_permission_denied()
+            return redirect('core:dashboard_access_denied')
         
         return super().dispatch(request, *args, **kwargs)
     
@@ -170,8 +168,7 @@ def szbi_permission_required(permission_name, login_url=None, raise_exception=Fa
             if raise_exception:
                 raise PermissionDenied("Nie masz uprawnień do wykonania tej operacji.")
             
-            messages.error(request, "Nie masz uprawnień do wykonania tej operacji.")
-            return redirect('core:dashboard')
+            return redirect('core:dashboard_access_denied')
         
         return _wrapped_view
     return decorator

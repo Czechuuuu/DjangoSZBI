@@ -3,18 +3,19 @@
 {% block title %}Słownik ISO 27001 - SZBI{% endblock %}
 
 {% block content %}
-<h2>Słownik ISO 27001 — Tablica A.1</h2>
+<h2>Słownik ISO 27001</h2>
 
-<p>
-    <a href="{% url 'dictionary:domain_create' %}">+ Dodaj domenę</a>
-    <a href="{% url 'dictionary:objective_create' %}">+ Dodaj cel wymagań</a>
-    | <a href="{% url 'dictionary:iso_requirement_create' %}">+ Dodaj wymaganie</a>
-    | <a href="{% url 'dictionary:iso_requirement_list' %}">📋 Lista wymagań</a>
-</p>
+<div class="actions">
+    <a href="{% url 'dictionary:category_create' %}" class="btn">+ Dodaj kategorię</a>
+    <a href="{% url 'dictionary:domain_create' %}" class="btn">+ Dodaj domenę</a>
+    <a href="{% url 'dictionary:objective_create' %}" class="btn">+ Dodaj cel wymagań</a>
+    <a href="{% url 'dictionary:iso_requirement_create' %}" class="btn">+ Dodaj wymaganie</a>
+    <a href="{% url 'dictionary:iso_requirement_list' %}" class="btn btn-outline">📋 Lista wymagań</a>
+</div>
 
-<!-- Statystyki -->
-<table border="1" cellpadding="8" cellspacing="0" style="margin-bottom: 20px;">
+<table class="stats-bar">
     <tr>
+        <th>Kategorie</th>
         <th>Domeny</th>
         <th>Cele</th>
         <th>Wymagania</th>
@@ -23,104 +24,179 @@
         <th>✗ Nie</th>
         <th>N/D</th>
     </tr>
-    <tr style="text-align: center;">
+    <tr>
+        <td>{{ stats.categories }}</td>
         <td>{{ stats.domains }}</td>
         <td>{{ stats.objectives }}</td>
         <td><strong>{{ stats.total }}</strong></td>
-        <td style="color: green;">{{ stats.applied }}</td>
-        <td style="color: orange;">{{ stats.partial }}</td>
-        <td style="color: red;">{{ stats.not_applied }}</td>
-        <td style="color: gray;">{{ stats.not_applicable }}</td>
+        <td class="status-applied">{{ stats.applied }}</td>
+        <td class="status-partial">{{ stats.partial }}</td>
+        <td class="status-not-applied">{{ stats.not_applied }}</td>
+        <td class="status-not-applicable">{{ stats.not_applicable }}</td>
     </tr>
 </table>
 
-<hr>
+{% for category in categories %}
+<div class="iso-category">
+    <div class="iso-category-header">
+        <span><strong>{{ category.code }}</strong> &nbsp; {{ category.name }}</span>
+        <span>
+            <a href="{% url 'dictionary:domain_create_for_category' category.pk %}" class="btn btn-sm">+ domena</a>
+            <a href="{% url 'dictionary:category_update' category.pk %}" class="btn btn-outline btn-sm">edytuj</a>
+            <a href="{% url 'dictionary:category_delete' category.pk %}" class="btn btn-outline-danger btn-sm">usuń</a>
+        </span>
+    </div>
+    {% if category.description %}
+    <div class="iso-category-desc">{{ category.description }}</div>
+    {% endif %}
 
-<!-- Drzewo ISO -->
-{% for domain in domains %}
-<div style="border: 1px solid #333; margin-bottom: 15px; padding: 0;">
-    <!-- Nagłówek domeny -->
-    <div style="background: #2c3e50; color: white; padding: 10px 15px;">
-        <strong>{{ domain.code }}</strong> &nbsp; {{ domain.name }}
-        <span style="float: right;">
-            <a href="{% url 'dictionary:objective_create_for_domain' domain.pk %}" style="color: #aed6f1;">+ cel</a>
-            | <a href="{% url 'dictionary:domain_update' domain.pk %}" style="color: #f9e79f;">edytuj</a>
-            | <a href="{% url 'dictionary:domain_delete' domain.pk %}" style="color: #f5b7b1;">usuń</a>
+    {% for domain in category.domains.all %}
+    <div class="iso-domain">
+        <div class="iso-domain-header">
+            <span><strong>{{ domain.code }}</strong> &nbsp; {{ domain.name }}</span>
+            <span>
+                <a href="{% url 'dictionary:objective_create_for_domain' domain.pk %}" class="btn btn-sm">+ cel</a>
+                <a href="{% url 'dictionary:domain_update' domain.pk %}" class="btn btn-outline btn-sm">edytuj</a>
+                <a href="{% url 'dictionary:domain_delete' domain.pk %}" class="btn btn-outline-danger btn-sm">usuń</a>
+            </span>
+        </div>
+        
+        {% for objective in domain.objectives.all %}
+        <div class="iso-objective">
+            <div class="iso-objective-header">
+                <span><strong>{{ objective.code }}</strong> &nbsp; {{ objective.name }}</span>
+                <span>
+                    <a href="{% url 'dictionary:iso_requirement_create_for_objective' objective.pk %}" class="btn btn-sm">+ wymaganie</a>
+                    <a href="{% url 'dictionary:objective_update' objective.pk %}" class="btn btn-outline btn-sm">edytuj</a>
+                    <a href="{% url 'dictionary:objective_delete' objective.pk %}" class="btn btn-outline-danger btn-sm">usuń</a>
+                </span>
+            </div>
+            
+            {% if objective.objective_text %}
+            <div class="iso-objective-text">
+                <strong>Cel:</strong> {{ objective.objective_text }}
+            </div>
+            {% endif %}
+            
+            {% for req in objective.requirements.all %}
+            <div class="iso-requirement-row">
+                <span class="iso-req-id">{{ req.iso_id }}</span>
+                <span class="iso-req-name">
+                    <a href="{% url 'dictionary:iso_requirement_detail' req.pk %}">{{ req.name }}</a>
+                    {% if req.description %}
+                    <div class="iso-req-desc">
+                        <strong>Wymaganie:</strong> {{ req.description|truncatewords:40 }}
+                    </div>
+                    {% endif %}
+                </span>
+                <span class="iso-req-status">
+                    {% if req.is_applied == 'yes' %}
+                        <span class="status-applied">✓ Tak</span>
+                    {% elif req.is_applied == 'partial' %}
+                        <span class="status-partial">◐ Częściowo</span>
+                    {% elif req.is_applied == 'no' %}
+                        <span class="status-not-applied">✗ Nie</span>
+                    {% else %}
+                        <span class="status-not-applicable">N/D</span>
+                    {% endif %}
+                </span>
+                <span class="iso-req-actions">
+                    <a href="{% url 'dictionary:iso_requirement_detail' req.pk %}" class="btn btn-outline btn-sm">szczegóły</a>
+                    <a href="{% url 'dictionary:iso_requirement_update' req.pk %}" class="btn btn-outline btn-sm">edytuj</a>
+                </span>
+            </div>
+            {% empty %}
+            <div class="iso-empty-msg">
+                Brak wymagań w tym celu.
+            </div>
+            {% endfor %}
+        </div>
+        {% empty %}
+        <div class="iso-empty-msg">
+            Brak celów w tej domenie.
+        </div>
+        {% endfor %}
+    </div>
+    {% empty %}
+    <div class="iso-empty-msg">
+        Brak domen w tej kategorii.
+    </div>
+    {% endfor %}
+</div>
+{% empty %}
+<p><em>Brak kategorii ISO w systemie. Dodaj pierwszą kategorię używając przycisku powyżej.</em></p>
+{% endfor %}
+
+{% if uncategorized_domains %}
+<h3>Domeny bez przypisanej kategorii</h3>
+{% for domain in uncategorized_domains %}
+<div class="iso-domain">
+    <div class="iso-domain-header">
+        <span><strong>{{ domain.code }}</strong> &nbsp; {{ domain.name }}</span>
+        <span>
+            <a href="{% url 'dictionary:objective_create_for_domain' domain.pk %}" class="btn btn-sm">+ cel</a>
+            <a href="{% url 'dictionary:domain_update' domain.pk %}" class="btn btn-outline btn-sm">edytuj (przypisz kategorię)</a>
+            <a href="{% url 'dictionary:domain_delete' domain.pk %}" class="btn btn-outline-danger btn-sm">usuń</a>
         </span>
     </div>
     
     {% for objective in domain.objectives.all %}
-    <div style="border-top: 1px solid #bbb; padding: 0;">
-        <!-- Nagłówek celu -->
-        <div style="background: #d5dbdb; padding: 8px 15px;">
-            <strong>{{ objective.code }}</strong> &nbsp; {{ objective.name }}
-            <span style="float: right;">
-                <a href="{% url 'dictionary:iso_requirement_create_for_objective' objective.pk %}">+ wymaganie</a>
-                | <a href="{% url 'dictionary:objective_update' objective.pk %}">edytuj</a>
-                | <a href="{% url 'dictionary:objective_delete' objective.pk %}">usuń</a>
+    <div class="iso-objective">
+        <div class="iso-objective-header">
+            <span><strong>{{ objective.code }}</strong> &nbsp; {{ objective.name }}</span>
+            <span>
+                <a href="{% url 'dictionary:iso_requirement_create_for_objective' objective.pk %}" class="btn btn-sm">+ wymaganie</a>
+                <a href="{% url 'dictionary:objective_update' objective.pk %}" class="btn btn-outline btn-sm">edytuj</a>
+                <a href="{% url 'dictionary:objective_delete' objective.pk %}" class="btn btn-outline-danger btn-sm">usuń</a>
             </span>
         </div>
         
         {% if objective.objective_text %}
-        <div style="background: #eaf2f8; padding: 8px 15px; font-style: italic; font-size: 0.9em;">
+        <div class="iso-objective-text">
             <strong>Cel:</strong> {{ objective.objective_text }}
         </div>
         {% endif %}
         
-        <!-- Wymagania w ramach celu -->
         {% for req in objective.requirements.all %}
-        <div style="border-top: 1px solid #ddd; padding: 8px 15px 8px 30px;">
-            <table style="width: 100%;" cellpadding="0" cellspacing="0">
-                <tr>
-                    <td style="width: 80px; vertical-align: top;">
-                        <strong>{{ req.iso_id }}</strong>
-                    </td>
-                    <td style="vertical-align: top;">
-                        <a href="{% url 'dictionary:iso_requirement_detail' req.pk %}">{{ req.name }}</a>
-                        {% if req.description %}
-                        <div style="font-size: 0.85em; color: #555; margin-top: 4px;">
-                            <strong>Wymaganie:</strong> {{ req.description|truncatewords:40 }}
-                        </div>
-                        {% endif %}
-                    </td>
-                    <td style="width: 100px; text-align: center; vertical-align: top;">
-                        {% if req.is_applied == 'yes' %}
-                            <span style="color: green;">✓ Tak</span>
-                        {% elif req.is_applied == 'partial' %}
-                            <span style="color: orange;">◐ Częściowo</span>
-                        {% elif req.is_applied == 'no' %}
-                            <span style="color: red;">✗ Nie</span>
-                        {% else %}
-                            <span style="color: gray;">N/D</span>
-                        {% endif %}
-                    </td>
-                    <td style="width: 120px; text-align: right; vertical-align: top;">
-                        <a href="{% url 'dictionary:iso_requirement_detail' req.pk %}">szczegóły</a>
-                        | <a href="{% url 'dictionary:iso_requirement_update' req.pk %}">edytuj</a>
-                    </td>
-                </tr>
-            </table>
+        <div class="iso-requirement-row">
+            <span class="iso-req-id">{{ req.iso_id }}</span>
+            <span class="iso-req-name">
+                <a href="{% url 'dictionary:iso_requirement_detail' req.pk %}">{{ req.name }}</a>
+            </span>
+            <span class="iso-req-status">
+                {% if req.is_applied == 'yes' %}
+                    <span class="status-applied">✓ Tak</span>
+                {% elif req.is_applied == 'partial' %}
+                    <span class="status-partial">◐ Częściowo</span>
+                {% elif req.is_applied == 'no' %}
+                    <span class="status-not-applied">✗ Nie</span>
+                {% else %}
+                    <span class="status-not-applicable">N/D</span>
+                {% endif %}
+            </span>
+            <span class="iso-req-actions">
+                <a href="{% url 'dictionary:iso_requirement_detail' req.pk %}" class="btn btn-outline btn-sm">szczegóły</a>
+                <a href="{% url 'dictionary:iso_requirement_update' req.pk %}" class="btn btn-outline btn-sm">edytuj</a>
+            </span>
         </div>
         {% empty %}
-        <div style="padding: 8px 15px 8px 30px; color: #888; font-style: italic;">
+        <div class="iso-empty-msg">
             Brak wymagań w tym celu.
         </div>
         {% endfor %}
     </div>
     {% empty %}
-    <div style="padding: 10px 15px; color: #888; font-style: italic;">
+    <div class="iso-empty-msg">
         Brak celów w tej domenie.
     </div>
     {% endfor %}
 </div>
-{% empty %}
-<p><em>Brak domen ISO w systemie. Dodaj pierwszą domenę używając przycisku powyżej.</em></p>
 {% endfor %}
+{% endif %}
 
 {% if orphan_requirements %}
-<hr>
 <h3>Wymagania bez przypisanego celu</h3>
-<table border="1" cellpadding="8" cellspacing="0">
+<table>
     <thead>
         <tr>
             <th>ID</th>
@@ -136,8 +212,8 @@
             <td>{{ req.name }}</td>
             <td>{{ req.get_is_applied_display }}</td>
             <td>
-                <a href="{% url 'dictionary:iso_requirement_update' req.pk %}">Edytuj (przypisz cel)</a>
-                | <a href="{% url 'dictionary:iso_requirement_delete' req.pk %}">Usuń</a>
+                <a href="{% url 'dictionary:iso_requirement_update' req.pk %}" class="btn btn-outline btn-sm">Edytuj (przypisz cel)</a>
+                <a href="{% url 'dictionary:iso_requirement_delete' req.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
             </td>
         </tr>
         {% endfor %}

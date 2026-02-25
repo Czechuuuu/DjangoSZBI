@@ -27,10 +27,10 @@
     
     <p>
         <button type="submit">Zapisz</button>
-        <a href="{% url 'core:permission_list' %}">Anuluj</a>
+        <a href="{% url 'core:permission_list' %}" class="btn btn-outline">Anuluj</a>
     </p>
 </form>
 
 <hr>
-<p><a href="{% url 'core:permission_list' %}">← Powrót do listy uprawnień</a></p>
+<p><a href="{% url 'core:permission_list' %}" class="btn btn-ghost">← Powrót do listy uprawnień</a></p>
 {% endblock %}

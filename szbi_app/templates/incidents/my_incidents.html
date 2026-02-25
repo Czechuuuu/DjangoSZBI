@@ -5,13 +5,13 @@
 {% block content %}
 <h2>Moje zgłoszenia incydentów</h2>
 
-<p>
-    <a href="{% url 'incidents:report' %}">+ Zgłoś nowy incydent</a> |
-    <a href="{% url 'incidents:list' %}">Wszystkie incydenty</a>
+<p class="actions">
+    <a href="{% url 'incidents:report' %}" class="btn">+ Zgłoś nowy incydent</a>
+    <a href="{% url 'incidents:list' %}" class="btn btn-outline">Wszystkie incydenty</a>
 </p>
 
 {% if incidents %}
-<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+<table>
     <thead>
         <tr>
             <th>#</th>
@@ -29,14 +29,14 @@
             <td>{{ incident.created_at|date:"Y-m-d H:i" }}</td>
             <td>{{ incident.get_status_display }}</td>
             <td>
-                <a href="{% url 'incidents:detail' incident.pk %}">Szczegóły</a>
+                <a href="{% url 'incidents:detail' incident.pk %}" class="btn btn-outline btn-sm">Szczegóły</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% else %}
-<p>Nie masz żadnych zgłoszeń. <a href="{% url 'incidents:report' %}">Zgłoś incydent</a>.</p>
+<p>Nie masz żadnych zgłoszeń. <a href="{% url 'incidents:report' %}" class="btn">Zgłoś incydent</a>.</p>
 {% endif %}
 
 {% endblock %}

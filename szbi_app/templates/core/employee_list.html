@@ -5,9 +5,9 @@
 {% block content %}
 <h1>Pracownicy</h1>
 
-<p>
-    <a href="{% url 'core:employee_create' %}">Dodaj pracownika</a> |
-    <a href="{% url 'core:dashboard' %}">Powrót do panelu</a>
+<p class="actions">
+    <a href="{% url 'core:employee_create' %}" class="btn">Dodaj pracownika</a>
+    <a href="{% url 'core:dashboard' %}" class="btn btn-ghost">Powrót do panelu</a>
 </p>
 
 {% if messages %}
@@ -17,7 +17,7 @@
 {% endif %}
 
 {% if employees %}
-<table border="1" cellpadding="10" cellspacing="0">
+<table>
     <thead>
         <tr>
             <th>Imię i nazwisko</th>
@@ -40,9 +40,9 @@
             <td>{% if employee.is_active %}Aktywny{% else %}Nieaktywny{% endif %}</td>
             <td>{% if employee.user.is_staff %}Tak{% else %}Nie{% endif %}</td>
             <td>
-                <a href="{% url 'core:employee_permissions' employee.pk %}">Uprawnienia</a> |
-                <a href="{% url 'core:employee_update' employee.pk %}">Edytuj</a> |
-                <a href="{% url 'core:employee_delete' employee.pk %}">Usuń</a>
+                <a href="{% url 'core:employee_permissions' employee.pk %}" class="btn btn-outline btn-sm">Uprawnienia</a>
+                <a href="{% url 'core:employee_update' employee.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
+                <a href="{% url 'core:employee_delete' employee.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
             </td>
         </tr>
         {% endfor %}
@@ -51,6 +51,6 @@
 
 <p>Łącznie: <strong>{{ employees|length }}</strong> pracowników</p>
 {% else %}
-<p>Brak pracowników. <a href="{% url 'core:employee_create' %}">Dodaj pierwszego pracownika</a>.</p>
+<p>Brak pracowników. <a href="{% url 'core:employee_create' %}" class="btn">Dodaj pierwszego pracownika</a>.</p>
 {% endif %}
 {% endblock %}

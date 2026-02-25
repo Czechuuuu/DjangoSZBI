@@ -14,7 +14,7 @@
             <td>
                 {{ form.objective }}
                 {% if form.objective.errors %}
-                    <br><span style="color:red;">{{ form.objective.errors.0 }}</span>
+                    <br><span class="field-error">{{ form.objective.errors.0 }}</span>
                 {% endif %}
             </td>
         </tr>
@@ -23,7 +23,7 @@
             <td>
                 {{ form.iso_id }}
                 {% if form.iso_id.errors %}
-                    <br><span style="color:red;">{{ form.iso_id.errors.0 }}</span>
+                    <br><span class="field-error">{{ form.iso_id.errors.0 }}</span>
                 {% endif %}
                 <br><small>{{ form.iso_id.help_text }}</small>
             </td>
@@ -33,7 +33,7 @@
             <td>
                 {{ form.name }}
                 {% if form.name.errors %}
-                    <br><span style="color:red;">{{ form.name.errors.0 }}</span>
+                    <br><span class="field-error">{{ form.name.errors.0 }}</span>
                 {% endif %}
             </td>
         </tr>
@@ -42,7 +42,7 @@
             <td>
                 {{ form.description }}
                 {% if form.description.errors %}
-                    <br><span style="color:red;">{{ form.description.errors.0 }}</span>
+                    <br><span class="field-error">{{ form.description.errors.0 }}</span>
                 {% endif %}
             </td>
         </tr>
@@ -51,7 +51,7 @@
             <td>
                 {{ form.is_applied }}
                 {% if form.is_applied.errors %}
-                    <br><span style="color:red;">{{ form.is_applied.errors.0 }}</span>
+                    <br><span class="field-error">{{ form.is_applied.errors.0 }}</span>
                 {% endif %}
             </td>
         </tr>
@@ -60,7 +60,7 @@
             <td>
                 {{ form.implementation_method }}
                 {% if form.implementation_method.errors %}
-                    <br><span style="color:red;">{{ form.implementation_method.errors.0 }}</span>
+                    <br><span class="field-error">{{ form.implementation_method.errors.0 }}</span>
                 {% endif %}
                 <br><small>{{ form.implementation_method.help_text }}</small>
             </td>
@@ -70,7 +70,7 @@
             <td>
                 {{ form.notes }}
                 {% if form.notes.errors %}
-                    <br><span style="color:red;">{{ form.notes.errors.0 }}</span>
+                    <br><span class="field-error">{{ form.notes.errors.0 }}</span>
                 {% endif %}
             </td>
         </tr>
@@ -85,7 +85,7 @@
             <td>
                 {{ attachment_form.title }}
                 {% if attachment_form.title.errors %}
-                    <br><span style="color:red;">{{ attachment_form.title.errors.0 }}</span>
+                    <br><span class="field-error">{{ attachment_form.title.errors.0 }}</span>
                 {% endif %}
             </td>
         </tr>
@@ -94,7 +94,7 @@
             <td>
                 {{ attachment_form.file }}
                 {% if attachment_form.file.errors %}
-                    <br><span style="color:red;">{{ attachment_form.file.errors.0 }}</span>
+                    <br><span class="field-error">{{ attachment_form.file.errors.0 }}</span>
                 {% endif %}
             </td>
         </tr>
@@ -103,7 +103,7 @@
     
     <p>
         <button type="submit">{% if is_edit %}Zapisz zmiany{% else %}Dodaj wymaganie{% endif %}</button>
-        <a href="{% url 'dictionary:iso_tree' %}">Anuluj</a>
+        <a href="{% url 'dictionary:iso_tree' %}" class="btn btn-outline">Anuluj</a>
     </p>
 </form>
 

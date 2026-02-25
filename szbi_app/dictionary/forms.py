@@ -1,13 +1,36 @@
 from django import forms
-from .models import ISORequirement, ISODomain, ISOObjective, ISOAttachment
+from .models import ISOCategory, ISORequirement, ISODomain, ISOObjective, ISOAttachment
+
+
+class ISOCategoryForm(forms.ModelForm):
+    """Formularz kategorii ISO (A, B, C, D)"""
+    class Meta:
+        model = ISOCategory
+        fields = ['code', 'name', 'description']
+        widgets = {
+            'code': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'np. A, B, C'
+            }),
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nazwa kategorii'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Opcjonalny opis kategorii'
+            }),
+        }
 
 
 class ISODomainForm(forms.ModelForm):
     """Formularz domeny ISO"""
     class Meta:
         model = ISODomain
-        fields = ['code', 'name']
+        fields = ['category', 'code', 'name']
         widgets = {
+            'category': forms.Select(attrs={'class': 'form-control'}),
             'code': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'np. A.5'

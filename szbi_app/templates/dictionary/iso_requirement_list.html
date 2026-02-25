@@ -5,23 +5,20 @@
 {% block content %}
 <h2>Lista wymagań ISO 27001</h2>
 
-<!-- Przyciski akcji -->
-<p>
-    <a href="{% url 'dictionary:iso_tree' %}">← Drzewo ISO</a>
-    | <a href="{% url 'dictionary:iso_requirement_create' %}">+ Dodaj wymaganie</a>
+<p class="actions">
+    <a href="{% url 'dictionary:iso_tree' %}" class="btn btn-ghost">← Drzewo ISO</a>
+    <a href="{% url 'dictionary:iso_requirement_create' %}" class="btn">+ Dodaj wymaganie</a>
 </p>
 
-<!-- Statystyki -->
 <p>
     <strong>Statystyki:</strong>
     Razem: <strong>{{ stats.total }}</strong> |
-    Stosujemy: <strong style="color:green;">{{ stats.applied }}</strong> |
-    Nie stosujemy: <strong style="color:red;">{{ stats.not_applied }}</strong> |
-    Częściowo: <strong style="color:orange;">{{ stats.partial }}</strong> |
-    Nie dotyczy: <strong style="color:gray;">{{ stats.not_applicable }}</strong>
+    Stosujemy: <strong class="status-applied">{{ stats.applied }}</strong> |
+    Nie stosujemy: <strong class="status-not-applied">{{ stats.not_applied }}</strong> |
+    Częściowo: <strong class="status-partial">{{ stats.partial }}</strong> |
+    Nie dotyczy: <strong class="status-not-applicable">{{ stats.not_applicable }}</strong>
 </p>
 
-<!-- Filtry -->
 <form method="get">
     <label for="search">Szukaj:</label>
     <input type="text" id="search" name="search" value="{{ search }}" placeholder="ID, nazwa, opis...">
@@ -43,14 +40,13 @@
     </select>
     
     <button type="submit">Filtruj</button>
-    <a href="{% url 'dictionary:iso_requirement_list' %}">Wyczyść</a>
+    <a href="{% url 'dictionary:iso_requirement_list' %}" class="btn btn-ghost">Wyczyść</a>
 </form>
 
 <hr>
 
-<!-- Tabela wymagań -->
 {% if requirements %}
-<table border="1" cellpadding="8" cellspacing="0">
+<table>
     <thead>
         <tr>
             <th>ID</th>
@@ -72,56 +68,55 @@
                 {% if req.objective %}
                     <small>{{ req.objective.domain.code }} → {{ req.objective.code }}</small>
                 {% else %}
-                    <em style="color:#999;">—</em>
+                    <em class="status-muted">—</em>
                 {% endif %}
             </td>
             <td>
                 {% if req.is_applied == 'yes' %}
-                    <span style="color:green;">✓ Tak</span>
+                    <span class="status-applied">✓ Tak</span>
                 {% elif req.is_applied == 'no' %}
-                    <span style="color:red;">✗ Nie</span>
+                    <span class="status-not-applied">✗ Nie</span>
                 {% elif req.is_applied == 'partial' %}
-                    <span style="color:orange;">◐ Częściowo</span>
+                    <span class="status-partial">◐ Częściowo</span>
                 {% else %}
-                    <span style="color:gray;">N/D</span>
+                    <span class="status-not-applicable">N/D</span>
                 {% endif %}
             </td>
             <td>
                 {% if req.implementation_method %}
                     {{ req.implementation_method|truncatewords:20 }}
                 {% else %}
-                    <em style="color:#999;">—</em>
+                    <em class="status-muted">—</em>
                 {% endif %}
             </td>
             <td>
-                <a href="{% url 'dictionary:iso_requirement_detail' req.pk %}">Szczegóły</a> |
-                <a href="{% url 'dictionary:iso_requirement_update' req.pk %}">Edytuj</a> |
-                <a href="{% url 'dictionary:iso_requirement_delete' req.pk %}">Usuń</a>
+                <a href="{% url 'dictionary:iso_requirement_detail' req.pk %}" class="btn btn-outline btn-sm">Szczegóły</a>
+                <a href="{% url 'dictionary:iso_requirement_update' req.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
+                <a href="{% url 'dictionary:iso_requirement_delete' req.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<!-- Paginacja -->
 {% if requirements.has_other_pages %}
 <p>
     {% if requirements.has_previous %}
-        <a href="?page=1{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if domain_filter %}&domain={{ domain_filter }}{% endif %}">« Pierwsza</a>
-        <a href="?page={{ requirements.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if domain_filter %}&domain={{ domain_filter }}{% endif %}">‹ Poprzednia</a>
+        <a href="?page=1{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if domain_filter %}&domain={{ domain_filter }}{% endif %}" class="btn btn-outline btn-sm">« Pierwsza</a>
+        <a href="?page={{ requirements.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if domain_filter %}&domain={{ domain_filter }}{% endif %}" class="btn btn-outline btn-sm">‹ Poprzednia</a>
     {% endif %}
     
     Strona {{ requirements.number }} z {{ requirements.paginator.num_pages }}
     
     {% if requirements.has_next %}
-        <a href="?page={{ requirements.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if domain_filter %}&domain={{ domain_filter }}{% endif %}">Następna ›</a>
-        <a href="?page={{ requirements.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if domain_filter %}&domain={{ domain_filter }}{% endif %}">Ostatnia »</a>
+        <a href="?page={{ requirements.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if domain_filter %}&domain={{ domain_filter }}{% endif %}" class="btn btn-outline btn-sm">Następna ›</a>
+        <a href="?page={{ requirements.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if domain_filter %}&domain={{ domain_filter }}{% endif %}" class="btn btn-outline btn-sm">Ostatnia »</a>
     {% endif %}
 </p>
 {% endif %}
 
 {% else %}
-<p><em>Brak wymagań spełniających kryteria. <a href="{% url 'dictionary:iso_requirement_create' %}">Dodaj pierwsze wymaganie</a>.</em></p>
+<p><em>Brak wymagań spełniających kryteria. <a href="{% url 'dictionary:iso_requirement_create' %}" class="btn">Dodaj pierwsze wymaganie</a>.</em></p>
 {% endif %}
 
 {% endblock %}

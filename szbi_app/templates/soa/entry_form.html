@@ -6,7 +6,7 @@
 <h2>{% if entry %}Edytuj pozycję: {{ entry.requirement.iso_id }}{% else %}Dodaj pozycję do deklaracji {{ declaration.designation }}{% endif %}</h2>
 
 <p>
-    <a href="{% url 'soa:detail' declaration.pk %}">← Powrót do deklaracji</a>
+    <a href="{% url 'soa:detail' declaration.pk %}" class="btn btn-ghost">← Powrót do deklaracji</a>
 </p>
 
 <form method="post">
@@ -28,7 +28,7 @@
         <p>
             <label for="id_requirement">Wymaganie*</label><br>
             {{ form.requirement }}
-            {% if form.requirement.errors %}<br><span style="color: red;">{{ form.requirement.errors }}</span>{% endif %}
+            {% if form.requirement.errors %}<br><span class="field-error">{{ form.requirement.errors }}</span>{% endif %}
         </p>
     </fieldset>
     
@@ -54,7 +54,7 @@
         <p>
             <label for="{{ form.justification.id_for_label }}">Uzasadnienie*</label><br>
             {{ form.justification }}
-            {% if form.justification.errors %}<br><span style="color: red;">{{ form.justification.errors }}</span>{% endif %}
+            {% if form.justification.errors %}<br><span class="field-error">{{ form.justification.errors }}</span>{% endif %}
         </p>
         
         <p>
@@ -65,7 +65,7 @@
     
     <p>
         <button type="submit">{% if entry %}Zapisz zmiany{% else %}Dodaj pozycję{% endif %}</button>
-        <a href="{% url 'soa:detail' declaration.pk %}">Anuluj</a>
+        <a href="{% url 'soa:detail' declaration.pk %}" class="btn btn-outline">Anuluj</a>
     </p>
 </form>
 

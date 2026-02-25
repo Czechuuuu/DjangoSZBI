@@ -5,14 +5,14 @@
 {% block content %}
 <h2>Wymaganie ISO: {{ iso_req.iso_id }}</h2>
 
-<p>
-    <a href="{% url 'dictionary:iso_tree' %}">← Drzewo ISO</a>
-    | <a href="{% url 'dictionary:iso_requirement_list' %}">Lista wymagań</a>
-    | <a href="{% url 'dictionary:iso_requirement_update' iso_req.pk %}">Edytuj</a>
-    | <a href="{% url 'dictionary:iso_requirement_delete' iso_req.pk %}">Usuń</a>
+<p class="actions">
+    <a href="{% url 'dictionary:iso_tree' %}" class="btn btn-ghost">← Drzewo ISO</a>
+    <a href="{% url 'dictionary:iso_requirement_list' %}" class="btn btn-outline">Lista wymagań</a>
+    <a href="{% url 'dictionary:iso_requirement_update' iso_req.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
+    <a href="{% url 'dictionary:iso_requirement_delete' iso_req.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
 </p>
 
-<table border="1" cellpadding="12" cellspacing="0">
+<table class="detail-table">
     <tr>
         <th>ID wymagania</th>
         <td><strong>{{ iso_req.iso_id }}</strong></td>
@@ -22,6 +22,12 @@
         <td>{{ iso_req.name }}</td>
     </tr>
     {% if iso_req.objective %}
+    {% if iso_req.objective.domain.category %}
+    <tr>
+        <th>Kategoria</th>
+        <td>{{ iso_req.objective.domain.category }}</td>
+    </tr>
+    {% endif %}
     <tr>
         <th>Domena</th>
         <td>{{ iso_req.objective.domain }}</td>
@@ -31,7 +37,7 @@
         <td>
             {{ iso_req.objective }}
             {% if iso_req.objective.objective_text %}
-            <br><em style="color: #555;">Cel: {{ iso_req.objective.objective_text }}</em>
+            <br><em class="text-muted">Cel: {{ iso_req.objective.objective_text }}</em>
             {% endif %}
         </td>
     </tr>
@@ -46,13 +52,13 @@
         <th>Czy stosujemy?</th>
         <td>
             {% if iso_req.is_applied == 'yes' %}
-                <span style="color: green;">✓ Tak</span>
+                <span class="status-applied">✓ Tak</span>
             {% elif iso_req.is_applied == 'no' %}
-                <span style="color: red;">✗ Nie</span>
+                <span class="status-not-applied">✗ Nie</span>
             {% elif iso_req.is_applied == 'partial' %}
-                <span style="color: orange;">◐ Częściowo</span>
+                <span class="status-partial">◐ Częściowo</span>
             {% else %}
-                <span style="color: gray;">— Nie dotyczy</span>
+                <span class="status-not-applicable">— Nie dotyczy</span>
             {% endif %}
         </td>
     </tr>
@@ -88,11 +94,10 @@
     </tr>
 </table>
 
-<!-- Załączniki (pliki) -->
 <h3>📎 Pliki / załączniki</h3>
 
 {% if attachments %}
-<table border="1" cellpadding="8" cellspacing="0">
+<table class="detail-table">
     <thead>
         <tr>
             <th>Tytuł</th>
@@ -110,8 +115,8 @@
             <td>{{ att.uploaded_at|date:"Y-m-d H:i" }}</td>
             <td>{{ att.uploaded_by.username|default:"-" }}</td>
             <td>
-                <a href="{% url 'dictionary:attachment_download' att.pk %}">Pobierz</a>
-                | <a href="{% url 'dictionary:attachment_delete' att.pk %}">Usuń</a>
+                <a href="{% url 'dictionary:attachment_download' att.pk %}" class="btn btn-outline btn-sm">Pobierz</a>
+                <a href="{% url 'dictionary:attachment_delete' att.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
             </td>
         </tr>
         {% endfor %}
@@ -122,14 +127,13 @@
 {% endif %}
 
 <p>
-    <a href="{% url 'dictionary:attachment_add' iso_req.pk %}">+ Dodaj plik</a>
+    <a href="{% url 'dictionary:attachment_add' iso_req.pk %}" class="btn">+ Dodaj plik</a>
 </p>
 
-<!-- Powiązane dokumenty -->
 <h3>📄 Powiązane dokumenty</h3>
 
 {% if document_mappings %}
-<table border="1" cellpadding="8" cellspacing="0">
+<table class="detail-table">
     <thead>
         <tr>
             <th>Dokument</th>
@@ -159,7 +163,7 @@
 {% else %}
 <p><em>To wymaganie nie jest jeszcze powiązane z żadnymi dokumentami.</em></p>
 <p>
-    <a href="{% url 'documents:list' %}">Przejdź do listy dokumentów</a>, aby dodać powiązania.
+    <a href="{% url 'documents:list' %}" class="btn btn-outline">Przejdź do listy dokumentów</a>, aby dodać powiązania.
 </p>
 {% endif %}
 

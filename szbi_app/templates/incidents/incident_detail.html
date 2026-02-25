@@ -5,18 +5,17 @@
 {% block content %}
 <h2>Incydent #{{ incident.pk }}: {{ incident.title }}</h2>
 
-<p>
-    <a href="{% url 'incidents:list' %}">← Powrót do listy</a> |
-    <a href="{% url 'incidents:my_list' %}">Moje zgłoszenia</a> |
-    <a href="{% url 'incidents:delete' incident.pk %}" style="color: red;">Usuń</a>
-</p>
+<div class="actions">
+    <a href="{% url 'incidents:list' %}" class="btn btn-ghost">← Powrót do listy</a>
+    <a href="{% url 'incidents:my_list' %}" class="btn btn-outline">Moje zgłoszenia</a>
+    <a href="{% url 'incidents:delete' incident.pk %}" class="btn btn-outline-danger btn-sm">Usuń</a>
+</div>
 
-<!-- STATUS WORKFLOW -->
-<div style="background: #f0f0f0; padding: 10px; margin-bottom: 20px;">
+<div class="card">
     <strong>Status:</strong> {{ incident.get_status_display }}
     
     {% if incident.get_next_status %}
-    <form method="post" action="{% url 'incidents:advance_status' incident.pk %}" style="display: inline;">
+    <form method="post" action="{% url 'incidents:advance_status' incident.pk %}" class="inline-form">
         {% csrf_token %}
         <button type="submit">Przejdź do: 
             {% if incident.status == 'reported' %}Analiza
@@ -31,17 +30,16 @@
     <br>
     <small>
         Workflow: 
-        <span {% if incident.status == 'reported' %}style="font-weight: bold;"{% endif %}>Zgłoszony</span> → 
-        <span {% if incident.status == 'analysis' %}style="font-weight: bold;"{% endif %}>Analiza</span> → 
-        <span {% if incident.status == 'response' %}style="font-weight: bold;"{% endif %}>Reakcja</span> → 
-        <span {% if incident.status == 'action' %}style="font-weight: bold;"{% endif %}>Działanie</span> → 
-        <span {% if incident.status == 'closed' %}style="font-weight: bold;"{% endif %}>Zakończony</span>
+        <span class="workflow-step{% if incident.status == 'reported' %} active{% endif %}">Zgłoszony</span> → 
+        <span class="workflow-step{% if incident.status == 'analysis' %} active{% endif %}">Analiza</span> → 
+        <span class="workflow-step{% if incident.status == 'response' %} active{% endif %}">Reakcja</span> → 
+        <span class="workflow-step{% if incident.status == 'action' %} active{% endif %}">Działanie</span> → 
+        <span class="workflow-step{% if incident.status == 'closed' %} active{% endif %}">Zakończony</span>
     </small>
 </div>
 
-<!-- DANE ZGŁOSZENIA -->
 <h3>Zgłoszenie</h3>
-<table border="1" cellspacing="0" cellpadding="5">
+<table class="detail-table">
     <tr>
         <th>Temat</th>
         <td>{{ incident.title }}</td>
@@ -78,24 +76,23 @@
     </tr>
 </table>
 
-<!-- ANALIZA -->
 <h3>Analiza</h3>
 {% if incident.status != 'reported' or user.is_staff %}
 <form method="post" action="{% url 'incidents:update_analysis' incident.pk %}">
     {% csrf_token %}
-    <table border="1" cellspacing="0" cellpadding="5">
+    <table class="detail-table">
         <tr>
             <th>Poważny incydent</th>
             <td>
                 {{ analysis_form.is_serious }}
-                {% if incident.is_serious %}<span style="color: red;">⚠ TAK</span>{% endif %}
+                {% if incident.is_serious %}<span class="badge-serious">⚠ TAK</span>{% endif %}
             </td>
         </tr>
         <tr>
             <th>Dotyczy danych osobowych</th>
             <td>
                 {{ analysis_form.involves_personal_data }}
-                {% if incident.involves_personal_data %}<span style="color: orange;">🔒 TAK</span>{% endif %}
+                {% if incident.involves_personal_data %}<span class="badge-personal-data">🔒 TAK</span>{% endif %}
             </td>
         </tr>
         <tr>
@@ -121,12 +118,11 @@
 <p><em>Analiza dostępna po zmianie statusu.</em></p>
 {% endif %}
 
-<!-- REAKCJA -->
 <h3>Reakcja</h3>
 {% if incident.status in 'response,action,closed' or user.is_staff %}
 <form method="post" action="{% url 'incidents:update_response' incident.pk %}">
     {% csrf_token %}
-    <table border="1" cellspacing="0" cellpadding="5">
+    <table class="detail-table">
         <tr>
             <th>Podjęte działania</th>
             <td>{{ response_form.response_actions }}</td>
@@ -142,12 +138,11 @@
 <p><em>Reakcja dostępna w fazie "Reakcja".</em></p>
 {% endif %}
 
-<!-- DZIAŁANIE -->
 <h3>Działanie po incydencie</h3>
 {% if incident.status in 'action,closed' or user.is_staff %}
 <form method="post" action="{% url 'incidents:update_action' incident.pk %}">
     {% csrf_token %}
-    <table border="1" cellspacing="0" cellpadding="5">
+    <table class="detail-table">
         <tr>
             <th>Działania naprawcze/zapobiegawcze</th>
             <td>{{ action_form.post_incident_actions }}</td>
@@ -159,10 +154,9 @@
 <p><em>Działania dostępne w fazie "Działanie".</em></p>
 {% endif %}
 
-<!-- ZAKOŃCZENIE -->
 <h3>Zakończenie</h3>
 {% if incident.status == 'closed' %}
-<table border="1" cellspacing="0" cellpadding="5">
+<table class="detail-table">
     <tr>
         <th>Wnioski</th>
         <td>{{ incident.conclusions|default:"-"|linebreaks }}</td>
@@ -179,13 +173,12 @@
         <label>Wnioski:</label><br>
         {{ close_form.conclusions }}
     </p>
-    <p><button type="submit" style="color: green;">Zamknij incydent</button></p>
+    <p><button type="submit" class="btn-success">Zamknij incydent</button></p>
 </form>
 {% else %}
 <p><em>Zakończenie dostępne w fazie "Działanie".</em></p>
 {% endif %}
 
-<!-- NOTATKI -->
 <h3>Notatki i komentarze</h3>
 <form method="post" action="{% url 'incidents:add_note' incident.pk %}">
     {% csrf_token %}
@@ -197,7 +190,7 @@
 </form>
 
 {% if notes %}
-<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+<table>
     <thead>
         <tr>
             <th>Data</th>
@@ -221,10 +214,9 @@
 <p>Brak notatek.</p>
 {% endif %}
 
-<!-- HISTORIA -->
 <h3>Historia zmian</h3>
 {% if logs %}
-<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+<table>
     <thead>
         <tr>
             <th>Data</th>

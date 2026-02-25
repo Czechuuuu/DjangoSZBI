@@ -12,15 +12,15 @@ z organizacji <strong>{{ organization.name }}</strong>?</p>
 {% include "core/_related_objects_warning.html" %}
 
 {% if blocked %}
-    <p><a href="{% url 'core:organization_structure' %}">← Powrót do struktury organizacji</a></p>
+    <p><a href="{% url 'core:organization_structure' %}" class="btn btn-ghost">← Powrót do struktury organizacji</a></p>
 {% else %}
     <form method="post">
         {% csrf_token %}
-        <button type="submit" style="background: #dc3545; color: white; padding: 8px 16px; border: none; cursor: pointer;">Tak, usuń</button>
-        <a href="{% url 'core:organization_structure' %}" style="margin-left: 10px;">Anuluj</a>
+        <button type="submit" class="btn-danger">Tak, usuń</button>
+        <a href="{% url 'core:organization_structure' %}" class="btn btn-outline">Anuluj</a>
     </form>
 {% endif %}
 
 <hr>
-<p><a href="{% url 'core:organization_structure' %}">← Powrót do struktury organizacji</a></p>
+<p><a href="{% url 'core:organization_structure' %}" class="btn btn-ghost">← Powrót do struktury organizacji</a></p>
 {% endblock %}

@@ -5,17 +5,16 @@
 {% block content %}
 <h2>Dokumenty</h2>
 
-<p>
-    <a href="{% url 'documents:create' %}">+ Dodaj dokument</a>
-    | <a href="{% url 'documents:shared_with_me' %}">Udostępnione dla mnie</a>
+<p class="actions">
+    <a href="{% url 'documents:create' %}" class="btn">+ Dodaj dokument</a>
+    <a href="{% url 'documents:shared_with_me' %}" class="btn btn-outline">Udostępnione dla mnie</a>
 </p>
 
-<!-- Filtry -->
-<form method="get" style="margin-bottom: 15px;">
+<form method="get" class="filter-form">
     <table>
         <tr>
             <td>
-                <input type="text" name="q" value="{{ current_search }}" placeholder="Szukaj (oznaczenie, tytuł...)" style="width: 200px;">
+                <input type="text" name="q" value="{{ current_search }}" placeholder="Szukaj (oznaczenie, tytuł...)">
             </td>
             <td>
                 <select name="status">
@@ -36,7 +35,7 @@
             <td>
                 <button type="submit">Filtruj</button>
                 {% if current_search or current_status or current_type %}
-                <a href="{% url 'documents:list' %}">Wyczyść</a>
+                <a href="{% url 'documents:list' %}" class="btn btn-ghost">Wyczyść</a>
                 {% endif %}
             </td>
         </tr>
@@ -44,7 +43,7 @@
 </form>
 
 {% if object_list %}
-<table border="1" cellpadding="10" cellspacing="0">
+<table>
     <thead>
         <tr>
             <th>Oznaczenie</th>
@@ -81,8 +80,8 @@
             <td>{{ doc.get_iso_requirements_count }}</td>
             <td>{{ doc.owner.username }}</td>
             <td>
-                <a href="{% url 'documents:detail' doc.pk %}">Szczegóły</a> |
-                <a href="{% url 'documents:update' doc.pk %}">Edytuj</a>
+                <a href="{% url 'documents:detail' doc.pk %}" class="btn btn-outline btn-sm">Szczegóły</a>
+                <a href="{% url 'documents:update' doc.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
             </td>
         </tr>
         {% endfor %}

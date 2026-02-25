@@ -6,8 +6,8 @@ from django.db.models import Q, Count
 from django.http import FileResponse
 from functools import wraps
 
-from .models import ISODomain, ISOObjective, ISORequirement, ISOAttachment
-from .forms import ISODomainForm, ISOObjectiveForm, ISORequirementForm, ISOAttachmentForm
+from .models import ISOCategory, ISODomain, ISOObjective, ISORequirement, ISOAttachment
+from .forms import ISOCategoryForm, ISODomainForm, ISOObjectiveForm, ISORequirementForm, ISOAttachmentForm
 from core.models import ActivityLog
 
 
@@ -35,8 +35,7 @@ def dictionary_permission_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if not has_dictionary_permission(request.user):
-            messages.error(request, 'Nie masz uprawnień do modułu Słownik ISO.')
-            return redirect('core:dashboard')
+            return redirect('core:dashboard_access_denied')
         return view_func(request, *args, **kwargs)
     return wrapper
 
@@ -62,13 +61,19 @@ def log_activity(request, action, obj, description):
 @login_required
 @dictionary_permission_required
 def iso_tree(request):
-    """Widok drzewa ISO: domeny → cele → wymagania"""
-    domains = ISODomain.objects.prefetch_related(
-        'objectives__requirements'
+    """Widok drzewa ISO: kategorie → domeny → cele → wymagania"""
+    categories = ISOCategory.objects.prefetch_related(
+        'domains__objectives__requirements'
     ).all()
+    
+    # Domeny bez przypisanej kategorii
+    uncategorized_domains = ISODomain.objects.filter(
+        category__isnull=True
+    ).prefetch_related('objectives__requirements')
     
     # Statystyki
     stats = {
+        'categories': ISOCategory.objects.count(),
         'domains': ISODomain.objects.count(),
         'objectives': ISOObjective.objects.count(),
         'total': ISORequirement.objects.count(),
@@ -82,9 +87,87 @@ def iso_tree(request):
     orphan_requirements = ISORequirement.objects.filter(objective__isnull=True)
     
     return render(request, 'dictionary/iso_tree.html', {
-        'domains': domains,
+        'categories': categories,
+        'uncategorized_domains': uncategorized_domains,
         'stats': stats,
         'orphan_requirements': orphan_requirements,
+    })
+
+
+# =============================================================================
+# KATEGORIE ISO (A, B, C, D)
+# =============================================================================
+
+@login_required
+@dictionary_permission_required
+def category_create(request):
+    """Tworzenie kategorii ISO"""
+    if request.method == 'POST':
+        form = ISOCategoryForm(request.POST)
+        if form.is_valid():
+            category = form.save()
+            log_activity(request, 'create', category, f'Utworzono kategorię ISO "{category}"')
+            messages.success(request, f'Kategoria "{category}" została utworzona.')
+            return redirect('dictionary:iso_tree')
+    else:
+        form = ISOCategoryForm()
+    
+    return render(request, 'dictionary/category_form.html', {
+        'form': form,
+        'title': 'Dodaj kategorię ISO',
+    })
+
+
+@login_required
+@dictionary_permission_required
+def category_update(request, pk):
+    """Edycja kategorii ISO"""
+    category = get_object_or_404(ISOCategory, pk=pk)
+    if request.method == 'POST':
+        form = ISOCategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            category = form.save()
+            log_activity(request, 'update', category, f'Zaktualizowano kategorię ISO "{category}"')
+            messages.success(request, f'Kategoria "{category}" została zaktualizowana.')
+            return redirect('dictionary:iso_tree')
+    else:
+        form = ISOCategoryForm(instance=category)
+    
+    return render(request, 'dictionary/category_form.html', {
+        'form': form,
+        'title': f'Edytuj kategorię: {category}',
+        'category': category,
+    })
+
+
+@login_required
+@dictionary_permission_required
+def category_delete(request, pk):
+    """Usuwanie kategorii ISO"""
+    category = get_object_or_404(ISOCategory, pk=pk)
+    from core.views import get_related_objects, has_blocking_relations
+    related = get_related_objects(category)
+    blocked = has_blocking_relations(related)
+    
+    if request.method == 'POST' and not blocked:
+        name = str(category)
+        category_id = category.pk
+        try:
+            category.delete()
+            ActivityLog.log(
+                user=request.user, action='delete', category='system',
+                object_type='ISOCategory', object_id=category_id, object_repr=name,
+                description=f'Usunięto kategorię ISO "{name}"', request=request
+            )
+            messages.success(request, f'Kategoria "{name}" została usunięta.')
+        except Exception as e:
+            messages.error(request, f'Nie można usunąć kategorii: {e}')
+        return redirect('dictionary:iso_tree')
+    
+    return render(request, 'dictionary/category_confirm_delete.html', {
+        'category': category,
+        'related': related,
+        'blocked': blocked,
     })
 
 
@@ -94,8 +177,12 @@ def iso_tree(request):
 
 @login_required
 @dictionary_permission_required
-def domain_create(request):
+def domain_create(request, category_pk=None):
     """Tworzenie domeny ISO"""
+    initial = {}
+    if category_pk:
+        initial['category'] = get_object_or_404(ISOCategory, pk=category_pk)
+    
     if request.method == 'POST':
         form = ISODomainForm(request.POST)
         if form.is_valid():
@@ -104,7 +191,7 @@ def domain_create(request):
             messages.success(request, f'Domena "{domain}" została utworzona.')
             return redirect('dictionary:iso_tree')
     else:
-        form = ISODomainForm()
+        form = ISODomainForm(initial=initial)
     
     return render(request, 'dictionary/domain_form.html', {
         'form': form,
@@ -407,7 +494,7 @@ def iso_requirement_delete(request, pk):
 def iso_requirement_detail(request, pk):
     """Szczegóły wymagania ISO wraz z powiązanymi dokumentami i załącznikami"""
     iso_req = get_object_or_404(
-        ISORequirement.objects.select_related('objective__domain'),
+        ISORequirement.objects.select_related('objective__domain__category'),
         pk=pk
     )
     

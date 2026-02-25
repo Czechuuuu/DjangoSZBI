@@ -34,15 +34,15 @@
         {% endfor %}
     </div>
     {% else %}
-    <p>Brak grup uprawnień w systemie. <a href="{% url 'core:permission_group_create' %}">Dodaj grupę uprawnień</a> najpierw.</p>
+    <p>Brak grup uprawnień w systemie. <a href="{% url 'core:permission_group_create' %}" class="btn">Dodaj grupę uprawnień</a> najpierw.</p>
     {% endif %}
     
     <p>
         <button type="submit">Zapisz</button>
-        <a href="{% url 'core:organization_structure' %}">Anuluj</a>
+        <a href="{% url 'core:organization_structure' %}" class="btn btn-outline">Anuluj</a>
     </p>
 </form>
 
 <hr>
-<p><a href="{% url 'core:organization_structure' %}">← Powrót do struktury organizacji</a></p>
+<p><a href="{% url 'core:organization_structure' %}" class="btn btn-ghost">← Powrót do struktury organizacji</a></p>
 {% endblock %}

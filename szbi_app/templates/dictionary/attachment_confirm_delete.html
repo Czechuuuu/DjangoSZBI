@@ -10,10 +10,10 @@ z wymagania <strong>{{ iso_req.iso_id }}</strong>?</p>
 
 <form method="post">
     {% csrf_token %}
-    <button type="submit" style="background: #dc3545; color: white; padding: 8px 16px; border: none; cursor: pointer;">Tak, usuń plik</button>
-    <a href="{% url 'dictionary:iso_requirement_detail' iso_req.pk %}" style="margin-left: 10px;">Anuluj</a>
+    <button type="submit" class="btn-danger">Tak, usuń plik</button>
+    <a href="{% url 'dictionary:iso_requirement_detail' iso_req.pk %}" class="btn btn-outline">Anuluj</a>
 </form>
 
 <hr>
-<p><a href="{% url 'dictionary:iso_requirement_detail' iso_req.pk %}">← Powrót do wymagania</a></p>
+<p><a href="{% url 'dictionary:iso_requirement_detail' iso_req.pk %}" class="btn btn-ghost">← Powrót do wymagania</a></p>
 {% endblock %}

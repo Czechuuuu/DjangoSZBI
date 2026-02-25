@@ -7,8 +7,14 @@ urlpatterns = [
     # Drzewo ISO (widok główny)
     path('', views.iso_tree, name='iso_tree'),
     
+    # Kategorie (A, B, C, D)
+    path('kategoria/dodaj/', views.category_create, name='category_create'),
+    path('kategoria/<int:pk>/edytuj/', views.category_update, name='category_update'),
+    path('kategoria/<int:pk>/usun/', views.category_delete, name='category_delete'),
+    
     # Domeny
     path('domena/dodaj/', views.domain_create, name='domain_create'),
+    path('domena/dodaj/<int:category_pk>/', views.domain_create, name='domain_create_for_category'),
     path('domena/<int:pk>/edytuj/', views.domain_update, name='domain_update'),
     path('domena/<int:pk>/usun/', views.domain_delete, name='domain_delete'),
     

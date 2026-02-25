@@ -7,11 +7,11 @@
 
 <p>Czy na pewno chcesz usunąć kategorię <strong>[{{ object.code }}] {{ object.name }}</strong>?</p>
 
-<p style="color: red;">Ta operacja jest nieodwracalna!</p>
+<p class="alert-text-danger">Ta operacja jest nieodwracalna!</p>
 
 <form method="post">
     {% csrf_token %}
-    <button type="submit" style="color: red;">Tak, usuń</button>
-    <a href="{% url 'assets:category_list' %}">Anuluj</a>
+    <button type="submit" class="btn-danger">Tak, usuń</button>
+    <a href="{% url 'assets:category_list' %}" class="btn btn-outline">Anuluj</a>
 </form>
 {% endblock %}

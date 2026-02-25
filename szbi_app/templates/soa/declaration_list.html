@@ -5,12 +5,11 @@
 {% block content %}
 <h2>Deklaracje Stosowania (SoA)</h2>
 
-<p>
-    <a href="{% url 'soa:create' %}">+ Nowa deklaracja</a>
+<p class="actions">
+    <a href="{% url 'soa:create' %}" class="btn">+ Nowa deklaracja</a>
 </p>
 
-<!-- Filtry -->
-<form method="get" style="margin-bottom: 20px;">
+<form method="get" class="filter-form">
     <fieldset>
         <legend>Filtry</legend>
         <label>Status:
@@ -29,12 +28,12 @@
         </label>
         
         <button type="submit">Filtruj</button>
-        <a href="{% url 'soa:list' %}">Wyczyść</a>
+        <a href="{% url 'soa:list' %}" class="btn btn-ghost">Wyczyść</a>
     </fieldset>
 </form>
 
 {% if declarations %}
-<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+<table>
     <thead>
         <tr>
             <th>Oznaczenie</th>
@@ -58,15 +57,15 @@
             <td>{{ decl.owner.username }}</td>
             <td>{{ decl.updated_at|date:"Y-m-d H:i" }}</td>
             <td>
-                <a href="{% url 'soa:detail' decl.pk %}">Szczegóły</a> |
-                <a href="{% url 'soa:update' decl.pk %}">Edytuj</a>
+                <a href="{% url 'soa:detail' decl.pk %}" class="btn btn-outline btn-sm">Szczegóły</a>
+                <a href="{% url 'soa:update' decl.pk %}" class="btn btn-outline btn-sm">Edytuj</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% else %}
-<p>Brak deklaracji do wyświetlenia. <a href="{% url 'soa:create' %}">Utwórz pierwszą deklarację</a>.</p>
+<p>Brak deklaracji do wyświetlenia. <a href="{% url 'soa:create' %}" class="btn">Utwórz pierwszą deklarację</a>.</p>
 {% endif %}
 
 {% endblock %}
